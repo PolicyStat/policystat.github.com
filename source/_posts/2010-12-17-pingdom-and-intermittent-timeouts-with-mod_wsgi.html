@@ -1,0 +1,31 @@
+---
+layout: post
+title: "Pingdom and Intermittent Timeouts with mod_wsgi"
+date: 2010-12-17 15:07
+permalink: intermittent-timeouts-with-modwsgi
+comments: true
+categories:
+- apache
+- django
+- mod_wsgi
+- devops
+---
+
+<h2>Server Errors, but Only Sometimes</h2>
+<p>We've been getting occasional reports from our users and staff that on rare occasions, a page doesn't load. Of course, the descriptions varied from "server error" to "error page" to "page timeout" to "page hanging" but that's the nature of verbal communication. English is hard, but debugging intermittent errors is probably harder. Luckily, we use <a href="http://pingdom.com/">Pingdom</a> to monitor our site and keep us informed of any problems, so we do have some data to refer to every time I hear of anyone having trouble. We run a check every minute against our login page to make sure that the welcome message and login form displays (among other checks). It's been easy to just refer to that and be assured that we've actually had 100% uptime.</p>
+<p><img src="/images/posts/intermittent-timeouts-with-modwsgi/uptime.png" alt="Pingdom Uptime" /></p>
+<h2>100% Is Only Sorta 100%</h2>
+<p>Looking back through the data again, I got a little bit suspicious. 100% seems too good to be true over 43,200 checks across the public internet, as you'd expect some packet somewhere to get dropped. After digging down to the detailed Pingdom report, I found out that Pingdom checks have another status beyond just "UP" or "DOWN." If a check fails, another check follows it immediately to confirm, and the first failed check shows up in the detailed logs as "DOWN_UNCONFIRMED." I comb through the logs and see that of the 43,200 checks in the last month, 47 of them have resulted in "DOWN_UNCONFIRMED" which is a bit more than 1 out of every 1000.</p>
+<h2>mod_wsgi, I'm Doing It Wrong</h2>
+<p>After combing through the various Nginx and Apache logs between all of our application servers, I find a rough pattern where around the time of a DOWN_UNCONFIRMED check I see one or more apache messages like this:</p>
+<pre>[Tue Dec 14 12:11:04 2010] [error] [client xxx.xxx.xxx.xxx] Premature end of script headers: deploy.wsgi
+</pre>
+<p>Ah ha!</p>
+<p>We use django running on mod_wsgi inside Apache2 reverse proxied via Nginx and deploy.wsgi is our Django wsgi file. Google helps me find a lot of different causes of the "Premature end of script headers" error message and I eliminate several of them. Finally I locate a post by the eminantly-helpful <a href="http://blog.dscpl.com.au/">Graham Dumpleton</a>&nbsp;on the <a href="http://groups.google.com/group/modwsgi/msg/480ea05b6e78f62e">mod_wsgi google group</a>&nbsp;where he mentions that whenever a <code>WSGIDaemonProcess</code>hits the <code>maximum-requests</code> limit, mod_wsgi will actually kill any requests currently being processed if they don't finish within 5 seconds. Our intermittent hangs instantly made sense because we had a relatively aggressive maximum-requests value of 500 (a reminant of formerly running mysql, memcached and apache2/modwsgi all on the same server).</p>
+<p>That meant that once every 500 requests, any users loading slow pages (reports, uploads, complex searches, etc) would get their request chopped off. It also explained why the failures were mostly clustered around our prime usage times because not only are page loads slightly slower when we're under load, but the wsgi daemon processes will be getting more requests and thus restarting more frequently.</p>
+<h2>Django + Apache2/mod_wsgi + Nginx Are Not Magic</h2>
+<p>I'm a huge fan of mod_wsgi and how easy it is to administrate, but this just goes to show that even subtle configuration decisions can have an impact. Graham Dumpleton can't read my mind, unfortunately.</p>
+<p>Our solution was to increase the maximum-requests value to 10k. This should cut down the number of dropped requests by 20x. We've got quite a bit of extra RAM, so this seems like an easy fix.</p>
+<p><img src="/images/posts/intermittent-timeouts-with-modwsgi/munin.png" alt="munin memory usage" /></p>
+<p>We'll also be monitoring memory usage using <a href="http://munin-monitoring.org/">Munin</a>&nbsp;and if it appears that memory leaks are not actually a problem for our application, we'll consider upping the maximum-requests value even further. Perhaps we can even eliminate maximum-requests entirely in favor of using our normal alerting and monitoring system to notify us in case mod_wsgi memory usage hits an unacceptable threshold.</p>
+<p>It seems that maybe the mod_wsgi documentation could benefit from a quick blurb about this side-effect of maximum-requests, so I opened a <a href="http://code.google.com/p/modwsgi/issues/detail?id=218">mod_wsgi issue</a> for a documentation enhancement.</p>
