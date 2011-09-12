@@ -1,55 +1,55 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://devblog.policystat.com/devops-at-our-startup/</loc>
+        <loc>http://devblog.policystat.com//devops-at-our-startup/</loc>
         <lastmod>2011-08-31T12:14:57-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comnetwork-latency-between-ec2-instances-public</loc>
+        <loc>http://devblog.policystat.com/network-latency-between-ec2-instances-public</loc>
         <lastmod>2011-09-08T18:04:13-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comphp-to-django-changing-the-engine-while-the-c</loc>
+        <loc>http://devblog.policystat.com/php-to-django-changing-the-engine-while-the-c</loc>
         <lastmod>2011-08-31T15:27:42-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comintermittent-timeouts-with-modwsgi</loc>
+        <loc>http://devblog.policystat.com/intermittent-timeouts-with-modwsgi</loc>
         <lastmod>2011-09-08T18:14:33-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comstructure-aware-change-tracking</loc>
+        <loc>http://devblog.policystat.com/structure-aware-change-tracking</loc>
         <lastmod>2011-09-12T11:25:35-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comusing-django-mailer-with-django-ses-for-amazo</loc>
+        <loc>http://devblog.policystat.com/using-django-mailer-with-django-ses-for-amazo</loc>
         <lastmod>2011-09-12T11:34:56-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comphp-to-django-how-we-did-it</loc>
+        <loc>http://devblog.policystat.com/php-to-django-how-we-did-it</loc>
         <lastmod>2011-09-12T11:52:33-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comtodays-amazon-ec2-ebs-outage-in-a-graph</loc>
+        <loc>http://devblog.policystat.com/todays-amazon-ec2-ebs-outage-in-a-graph</loc>
         <lastmod>2011-09-12T11:56:59-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.compolicypad-real-time-collaboration-through-you</loc>
+        <loc>http://devblog.policystat.com/policypad-real-time-collaboration-through-you</loc>
         <lastmod>2011-09-12T12:02:13-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comrun-mysql-from-a-ram-disk-in-ubuntu</loc>
+        <loc>http://devblog.policystat.com/run-mysql-from-a-ram-disk-in-ubuntu</loc>
         <lastmod>2011-09-12T12:06:52-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.comwhere-are-the-magic-deployment-tools</loc>
+        <loc>http://devblog.policystat.com/where-are-the-magic-deployment-tools</loc>
         <lastmod>2011-09-12T12:09:58-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.com/</loc>
+        <loc>http://devblog.policystat.com//</loc>
         <lastmod>2011-09-12T12:09:58-04:00</lastmod>
     </url>
     <url>
-        <loc>http://devblog.policystat.com/blog/archives/</loc>
+        <loc>http://devblog.policystat.com//blog/archives/</loc>
         <lastmod>2011-09-12T12:09:58-04:00</lastmod>
     </url>
 </urlset>

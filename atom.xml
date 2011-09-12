@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title>PolicyStat's Dev Blog</title>
-  <link href="http://devblog.policystat.com/atom.xml" rel="self"/>
-  <link href="http://devblog.policystat.com/"/>
-  <updated>2011-09-12T14:25:06-04:00</updated>
-  <id>http://devblog.policystat.com/</id>
+  <link href="http://devblog.policystat.com//atom.xml" rel="self"/>
+  <link href="http://devblog.policystat.com//"/>
+  <updated>2011-09-12T14:39:41-04:00</updated>
+  <id>http://devblog.policystat.com//</id>
   <author>
     <name>PolicyStat LLC</name>
     
@@ -14,9 +14,9 @@
   
   <entry>
     <title>Where are the magic deployment tools?</title>
-    <link href="http://devblog.policystat.comwhere-are-the-magic-deployment-tools"/>
+    <link href="http://devblog.policystat.com/where-are-the-magic-deployment-tools"/>
     <updated>2011-08-25T15:07:00-04:00</updated>
-    <id>http://devblog.policystat.com./where-are-the-magic-deployment-tools</id>
+    <id>http://devblog.policystat.com/./where-are-the-magic-deployment-tools</id>
     <content type="html">&lt;p&gt;This is a cross-post + Edit of my comment on a blog post by &lt;a href=&quot;http://twitter.com/lusis&quot;&gt;@lusis&lt;/a&gt; on &lt;a href=&quot;http://blog.lusis.org/blog/2011/08/22/the-configuration-management-divide/&quot;&gt;The Configuration Management Divide&lt;/a&gt;.&lt;/p&gt;
 &lt;h2&gt;Deployment is Not a Solved Problem&lt;/h2&gt;
 &lt;p&gt;From a developer's perspective, CM is definitely not a solved problem in general. It's solved for people using a PaaS provider like &lt;a href=&quot;http://www.heroku.com/&quot;&gt;heroku&lt;/a&gt; (until you hit a limit) and it's solved for developers in shops where someone has written a custom tool to make it easy (sounds like &lt;a href=&quot;https://github.com/etsy/deployinator&quot;&gt;Deployinator&lt;/a&gt; at Etsy is an example).&amp;nbsp;&lt;/p&gt;
@@ -48,9 +48,9 @@
   
   <entry>
     <title>Run MySQL From a RAM Disk in Ubuntu Linux</title>
-    <link href="http://devblog.policystat.comrun-mysql-from-a-ram-disk-in-ubuntu"/>
+    <link href="http://devblog.policystat.com/run-mysql-from-a-ram-disk-in-ubuntu"/>
     <updated>2011-08-12T15:07:00-04:00</updated>
-    <id>http://devblog.policystat.com./run-mysql-from-a-ram-disk-in-ubuntu-linux</id>
+    <id>http://devblog.policystat.com/./run-mysql-from-a-ram-disk-in-ubuntu-linux</id>
     <content type="html">&lt;p&gt;Here at PolicyStat, we heavily rely on unit tests, selenium tests and continuous integration to keep our quality up so that we can practice continuous delivery. That means we write a lot of tests and we run a lot of tests. A major source of frustration is the painfully &lt;strong&gt;bad MySQL performance&lt;/strong&gt; during tests&amp;nbsp;because of table creation overhead. One option we considered was to use the Memory storage engine in MySQL, but you lose some capabilities (blob and text columns) and you're no-longer testing your actual database.&lt;/p&gt;
 &lt;p&gt;Yesterday, I finally bit the bullet and figured out how to &lt;strong&gt;configure MySQL to run on a ramdisk&lt;/strong&gt;.&lt;/p&gt;
 &lt;h2&gt;Results&lt;/h2&gt;
@@ -92,7 +92,7 @@ datadir = /dev/shm/mysql
 &lt;pre&gt;$ sudo service apparmor restart
 $ sudo service mysql start&lt;/pre&gt;
 &lt;h2&gt;Results&lt;/h2&gt;
-&lt;p&gt;If you're using ext4 for your hard drive, you should see a *huge* performance improvement with a ramdisk. &lt;a href=&quot;http://devblog.policystat.com/authors/christian&quot;&gt;Christian's&lt;/a&gt; single selenium testcase run went from several painful minutes to 17 seconds. ext4 is a bit more paranoid about ensuring that changes are actually flushed to disc versus ext3, so you see a very large performance hit doing database and table creation. That means the gains from a RAMdisk are more dramatic.&lt;/p&gt;
+&lt;p&gt;If you're using ext4 for your hard drive, you should see a *huge* performance improvement with a ramdisk. &lt;a href=&quot;http://devblog.policystat.com//authors/christian&quot;&gt;Christian's&lt;/a&gt; single selenium testcase run went from several painful minutes to 17 seconds. ext4 is a bit more paranoid about ensuring that changes are actually flushed to disc versus ext3, so you see a very large performance hit doing database and table creation. That means the gains from a RAMdisk are more dramatic.&lt;/p&gt;
 &lt;p&gt;TODO: I have plans to create an upstart script to manage the process of copying data to the RAMdisk on every boot, but for now you'll need to do that manually every reboot.&lt;/p&gt;
 &lt;h2&gt;Troubleshooting&lt;/h2&gt;
 &lt;h3&gt;Not enough RAM (ibdata1 file is too big)&lt;/h3&gt;
@@ -102,14 +102,14 @@ $ sudo service mysql start&lt;/pre&gt;
   
   <entry>
     <title>PolicyPad: Etherpad + Bring Your Own Editor</title>
-    <link href="http://devblog.policystat.compolicypad-real-time-collaboration-through-you"/>
+    <link href="http://devblog.policystat.com/policypad-real-time-collaboration-through-you"/>
     <updated>2011-05-16T15:07:00-04:00</updated>
-    <id>http://devblog.policystat.com./policypad-real-time-collaboration</id>
+    <id>http://devblog.policystat.com/./policypad-real-time-collaboration</id>
     <content type="html">&lt;h2&gt;Real-time In-Browser Collaboration&lt;/h2&gt;
 &lt;p&gt;Real-time collaborative document editing in a web browser is hard. Google docs can do it, &lt;a href=&quot;http://etherpad.org/&quot;&gt;EtherPad&lt;/a&gt;&amp;nbsp;can do it, but can your app do it? &lt;a href=&quot;http://policypad.readthedocs.org/&quot;&gt;PolicyPad&lt;/a&gt; is a tool allowing you to make it happen using your existing javascript-based editor.&amp;nbsp;Thanks to the dedicated work of a small team of &lt;a href=&quot;http://www.rose-hulman.edu/&quot;&gt;Rose-Hulman Institute of Technology&lt;/a&gt; students (primarily &lt;a href=&quot;http://twitter.com/jetheis&quot;&gt;Jimmy Theis&lt;/a&gt;&amp;nbsp;and &lt;a href=&quot;https://github.com/wellsie1116&quot;&gt;Kevin Wells&lt;/a&gt;), we've put together a &lt;a href=&quot;http://policypad.pstattest.com/static/PolicyPad/demos/wymeditor/launcher.html&quot;&gt;demo&lt;/a&gt; with &lt;a href=&quot;https://github.com/PolicyStat/PolicyPad&quot;&gt;github'd source&lt;/a&gt;&amp;nbsp;demonstrating real-time collaboration using the standards-focused &lt;a href=&quot;http://www.wymeditor.org/&quot;&gt;WYMeditor&lt;/a&gt;&amp;nbsp;(What You Mean editor).&amp;nbsp;&lt;/p&gt;
 &lt;p&gt;PolicyPad is a library to help use any existing javascript-based editor in front of EtherPad to add real-time collaboration. This potentially allows your existing application, with all of your custom editor add-ons and integration, to add the goodness of Etherpad without the need to implement a complex server-side solution for diffing, version control, retrieval, etc.&amp;nbsp;&lt;/p&gt;
 &lt;h2&gt;PolicyPad Architecture&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/policypad/architecture.png&quot; alt=&quot;PolicyPad architecture diagram&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/policypad/architecture.png&quot; alt=&quot;PolicyPad architecture diagram&quot; /&gt;&lt;/p&gt;
 &lt;h2&gt;Future&lt;/h2&gt;
 &lt;p&gt;Right now, the code is working well with WYMeditor, but we'd really like to add plugins for other editors, such as &lt;a href=&quot;http://tinymce.moxiecode.com/&quot;&gt;TinyMCE&lt;/a&gt;&amp;nbsp;and &lt;a href=&quot;http://ckeditor.com/&quot;&gt;CKEditor&lt;/a&gt;. We'd also like to fill the existing gaps where the default Etherpad editor provides functionality that we don't yet mimick (real-time chat, stepping back through old versions, import/export).&lt;/p&gt;
 &lt;h2&gt;Get Involved:&lt;/h2&gt;
@@ -125,11 +125,11 @@ $ sudo service mysql start&lt;/pre&gt;
   
   <entry>
     <title>Today's Amazon ec2 EBS Outage in a Graph</title>
-    <link href="http://devblog.policystat.comtodays-amazon-ec2-ebs-outage-in-a-graph"/>
+    <link href="http://devblog.policystat.com/todays-amazon-ec2-ebs-outage-in-a-graph"/>
     <updated>2011-04-21T15:07:00-04:00</updated>
-    <id>http://devblog.policystat.com./todays-amazon-ec2-ebs-outage-in-a-graph</id>
+    <id>http://devblog.policystat.com/./todays-amazon-ec2-ebs-outage-in-a-graph</id>
     <content type="html">&lt;p&gt;
-    &lt;img src=&quot;http://devblog.policystat.com/images/posts/todays-amazon-ec2-ebs-outage/munin.png&quot; alt=&quot;munin disk throughput graph ebs&quot; /&gt;
+    &lt;img src=&quot;http://devblog.policystat.com//images/posts/todays-amazon-ec2-ebs-outage/munin.png&quot; alt=&quot;munin disk throughput graph ebs&quot; /&gt;
 &lt;/p&gt;
 &lt;p&gt;You can clearly see the sharp dropoffs in disk throughput as the EBS volume goes in and out of availability. This is a high-cpu medium instance in US East 1b with 1 10GB EBS volume attached.&lt;/p&gt;
 &lt;p&gt;Good news though, I learned a new euphemism for &quot;Stuff is Broke&quot;: &lt;strong&gt;Increased Latency&lt;/strong&gt;&lt;/p&gt;
@@ -153,13 +153,13 @@ $ sudo service mysql start&lt;/pre&gt;
   
   <entry>
     <title>PHP to Django: How we did it</title>
-    <link href="http://devblog.policystat.comphp-to-django-how-we-did-it"/>
+    <link href="http://devblog.policystat.com/php-to-django-how-we-did-it"/>
     <updated>2011-03-25T15:07:00-04:00</updated>
-    <id>http://devblog.policystat.com./php-to-django-how-we-did-it</id>
+    <id>http://devblog.policystat.com/./php-to-django-how-we-did-it</id>
     <content type="html">&lt;h2&gt;Only Took me Four Months&lt;/h2&gt;
-&lt;p&gt;Back in November I wrote about our slow journey from &lt;a href=&quot;http://devblog.policystat.com/php-to-django-changing-the-engine-while-the-c&quot;&gt;PHP to Django&lt;/a&gt;. Our startup went from a 100% PHP application to 100% Django over 22 months, with the two sides coexisting in production. We slowly made the conversion while also improving our product with new features, bug fixes and polish all around. From the response to that post, it seems like this might be a problem that other people have had or are having and at least a few people wanted more details.&lt;/p&gt;
+&lt;p&gt;Back in November I wrote about our slow journey from &lt;a href=&quot;http://devblog.policystat.com//php-to-django-changing-the-engine-while-the-c&quot;&gt;PHP to Django&lt;/a&gt;. Our startup went from a 100% PHP application to 100% Django over 22 months, with the two sides coexisting in production. We slowly made the conversion while also improving our product with new features, bug fixes and polish all around. From the response to that post, it seems like this might be a problem that other people have had or are having and at least a few people wanted more details.&lt;/p&gt;
 &lt;p&gt;So here I am putting code where my mouth is.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/php-to-django-how-we-did-it/first_commit.png&quot; alt=&quot;first django-php-bridge commit&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/php-to-django-how-we-did-it/first_commit.png&quot; alt=&quot;first django-php-bridge commit&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;This post is an introduction to the &lt;a href=&quot;https://github.com/winhamwr/django-php-bridge&quot;&gt;django-php-bridge&lt;/a&gt; project and a more technical discussion of how we made the transition.&lt;/p&gt;
 &lt;h2&gt;Introducing Django-PHP-Bridge&lt;/h2&gt;
 &lt;p&gt;The goal of django-php-bridge is to make it easier for PHP projects and Django projects to live side by side, passing authenticated users back and forth seemlessly.&lt;/p&gt;
@@ -196,9 +196,9 @@ $ sudo service mysql start&lt;/pre&gt;
   
   <entry>
     <title>Using django-mailer with django-ses for Amazon SES goodness</title>
-    <link href="http://devblog.policystat.comusing-django-mailer-with-django-ses-for-amazo"/>
+    <link href="http://devblog.policystat.com/using-django-mailer-with-django-ses-for-amazo"/>
     <updated>2011-03-08T15:07:00-05:00</updated>
-    <id>http://devblog.policystat.com./using-django-mailer-with-django-ses</id>
+    <id>http://devblog.policystat.com/./using-django-mailer-with-django-ses</id>
     <content type="html">&lt;p&gt;Amazon's new &lt;a href=&quot;http://aws.amazon.com/ses/&quot;&gt;Simple Email Service&lt;/a&gt; is pretty awesome.&lt;/p&gt;
 &lt;p&gt;Previously, there were basically two options:&lt;/p&gt;
 &lt;ol&gt;
@@ -206,7 +206,7 @@ $ sudo service mysql start&lt;/pre&gt;
     &lt;li&gt;Hassle with setting up a mail server and continuously wrangle with the email world to avoid spam filters&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;
-    &lt;img src=&quot;http://devblog.policystat.com/images/posts/using-django-mailer-with-django-ses/spam.jpg&quot; alt=&quot;spam&quot; /&gt;
+    &lt;img src=&quot;http://devblog.policystat.com//images/posts/using-django-mailer-with-django-ses/spam.jpg&quot; alt=&quot;spam&quot; /&gt;
 &lt;/p&gt;
 &lt;p&gt;With SES, you avoid the hassle of deliverability and you get 2k messages per day for free with 1 penny per hundred messages over that.&lt;/p&gt;
 &lt;p&gt;At PolicyStat, we use &lt;a href=&quot;http://pypi.python.org/pypi/django-mailer/0.1.0&quot;&gt;django-mailer&lt;/a&gt;&amp;nbsp;to queue up emails for sending so that we don't need to make an SMTP connection inside the request/response cycle. It also gives us nice logging and do-not-send abilities and we wanted to keep those. We also really wanted to use SES.&lt;/p&gt;
@@ -235,9 +235,9 @@ $ sudo service mysql start&lt;/pre&gt;
   
   <entry>
     <title>Structure Aware Change Tracking</title>
-    <link href="http://devblog.policystat.comstructure-aware-change-tracking"/>
+    <link href="http://devblog.policystat.com/structure-aware-change-tracking"/>
     <updated>2011-02-17T15:07:00-05:00</updated>
-    <id>http://devblog.policystat.com./structure-aware-change-tracking</id>
+    <id>http://devblog.policystat.com/./structure-aware-change-tracking</id>
     <content type="html">&lt;p&gt;At PolicyStat, whenever we have written a chunk of code that seems like it might have widespread usefulness, we like to release it as open source. We have recently released HTML Tree Diff, a library for showing diffs between HTML documents in a structure-aware way. It is written in Python, and you can get the source code at &lt;a href=&quot;https://github.com/christian-oudard/htmltreediff&quot; target=&quot;_blank&quot;&gt;GitHub&lt;/a&gt;, or install it from the &lt;a href=&quot;http://pypi.python.org/pypi/html-tree-diff/0.1.0&quot; target=&quot;_blank&quot;&gt;Python Package Index&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;We work with HTML documents every day, and we were disappointed that there was not an existing library to display &quot;track-changes&quot; style diffs between HTML documents. This code has been used in production since June 2009, and we're excited to share it with the community.&lt;/p&gt;
 &lt;h2&gt;Documents&lt;/h2&gt;
@@ -250,16 +250,16 @@ $ sudo service mysql start&lt;/pre&gt;
             &lt;td&gt;New&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr&gt;
-            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/old_document.png&quot; alt=&quot;old document&quot; /&gt;&lt;/td&gt;
-            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/new_document.png&quot; alt=&quot;new document&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/old_document.png&quot; alt=&quot;old document&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/new_document.png&quot; alt=&quot;new document&quot; /&gt;&lt;/td&gt;
         &lt;/tr&gt;
     &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;Someone has changed the jelly donut schedule! It's been the same for years! How will we remember the new one? Everybody panic!&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/panic.gif&quot; alt=&quot;PANIC&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/panic.gif&quot; alt=&quot;PANIC&quot; /&gt;&lt;/p&gt;
 &lt;h2&gt;Diffs&lt;/h2&gt;
 &lt;p&gt;But wait, through the clever use of technology, you can calm the panic by showing them exactly what changed between the two documents:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/inline_diff.png&quot; alt=&quot;inline diff&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/inline_diff.png&quot; alt=&quot;inline diff&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;As you may know, this is a &lt;a href=&quot;http://en.wikipedia.org/wiki/Diff&quot; target=&quot;_blank&quot;&gt;diff&lt;/a&gt;. It concisely shows what lines have changed between the successive versions. We can even fancy it up and use html styling to make it more readable:&lt;/p&gt;
 &lt;table&gt;
     &lt;tbody&gt;
@@ -268,8 +268,8 @@ $ sudo service mysql start&lt;/pre&gt;
             &lt;td&gt;Rendered&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr&gt;
-            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/source_doc.png&quot; alt=&quot;source doc&quot; /&gt;&lt;/td&gt;
-            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/rendered_doc.png&quot; alt=&quot;rendered doc&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/source_doc.png&quot; alt=&quot;source doc&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/rendered_doc.png&quot; alt=&quot;rendered doc&quot; /&gt;&lt;/td&gt;
         &lt;/tr&gt;
     &lt;/tbody&gt;
 &lt;/table&gt;
@@ -283,8 +283,8 @@ $ sudo service mysql start&lt;/pre&gt;
             &lt;td&gt;Rendered&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr&gt;
-            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/source_html.png&quot; alt=&quot;source html&quot; /&gt;&lt;/td&gt;
-            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/rendered_html.png&quot; alt=&quot;rendered html&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/source_html.png&quot; alt=&quot;source html&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/rendered_html.png&quot; alt=&quot;rendered html&quot; /&gt;&lt;/td&gt;
         &lt;/tr&gt;
     &lt;/tbody&gt;
 &lt;/table&gt;
@@ -301,10 +301,10 @@ $ sudo service mysql start&lt;/pre&gt;
         &lt;/tr&gt;
         &lt;tr&gt;
             &lt;td style=&quot;vertical-align: top;&quot;&gt;
-                &lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/structure_aware_diff_html.png&quot; alt=&quot;structure-aware diff HTML&quot; /&gt;
+                &lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/structure_aware_diff_html.png&quot; alt=&quot;structure-aware diff HTML&quot; /&gt;
             &lt;/td&gt;
             &lt;td style=&quot;vertical-align: top;&quot;&gt;
-                &lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/structure_aware_diff_rendered.png&quot; alt=&quot;sturcture-aware diff rendered&quot; /&gt;
+                &lt;img src=&quot;http://devblog.policystat.com//images/posts/structure-aware-change-tracking/structure_aware_diff_rendered.png&quot; alt=&quot;sturcture-aware diff rendered&quot; /&gt;
             &lt;/td&gt;
         &lt;/tr&gt;
     &lt;/tbody&gt;
@@ -315,12 +315,12 @@ $ sudo service mysql start&lt;/pre&gt;
   
   <entry>
     <title>Pingdom and Intermittent Timeouts with mod_wsgi</title>
-    <link href="http://devblog.policystat.comintermittent-timeouts-with-modwsgi"/>
+    <link href="http://devblog.policystat.com/intermittent-timeouts-with-modwsgi"/>
     <updated>2010-12-17T15:07:00-05:00</updated>
-    <id>http://devblog.policystat.com./pingdom-and-intermittent-timeouts-with-mod_wsgi</id>
+    <id>http://devblog.policystat.com/./pingdom-and-intermittent-timeouts-with-mod_wsgi</id>
     <content type="html">&lt;h2&gt;Server Errors, but Only Sometimes&lt;/h2&gt;
 &lt;p&gt;We've been getting occasional reports from our users and staff that on rare occasions, a page doesn't load. Of course, the descriptions varied from &quot;server error&quot; to &quot;error page&quot; to &quot;page timeout&quot; to &quot;page hanging&quot; but that's the nature of verbal communication. English is hard, but debugging intermittent errors is probably harder. Luckily, we use &lt;a href=&quot;http://pingdom.com/&quot;&gt;Pingdom&lt;/a&gt; to monitor our site and keep us informed of any problems, so we do have some data to refer to every time I hear of anyone having trouble. We run a check every minute against our login page to make sure that the welcome message and login form displays (among other checks). It's been easy to just refer to that and be assured that we've actually had 100% uptime.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/intermittent-timeouts-with-modwsgi/uptime.png&quot; alt=&quot;Pingdom Uptime&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/intermittent-timeouts-with-modwsgi/uptime.png&quot; alt=&quot;Pingdom Uptime&quot; /&gt;&lt;/p&gt;
 &lt;h2&gt;100% Is Only Sorta 100%&lt;/h2&gt;
 &lt;p&gt;Looking back through the data again, I got a little bit suspicious. 100% seems too good to be true over 43,200 checks across the public internet, as you'd expect some packet somewhere to get dropped. After digging down to the detailed Pingdom report, I found out that Pingdom checks have another status beyond just &quot;UP&quot; or &quot;DOWN.&quot; If a check fails, another check follows it immediately to confirm, and the first failed check shows up in the detailed logs as &quot;DOWN_UNCONFIRMED.&quot; I comb through the logs and see that of the 43,200 checks in the last month, 47 of them have resulted in &quot;DOWN_UNCONFIRMED&quot; which is a bit more than 1 out of every 1000.&lt;/p&gt;
 &lt;h2&gt;mod_wsgi, I'm Doing It Wrong&lt;/h2&gt;
@@ -333,7 +333,7 @@ $ sudo service mysql start&lt;/pre&gt;
 &lt;h2&gt;Django + Apache2/mod_wsgi + Nginx Are Not Magic&lt;/h2&gt;
 &lt;p&gt;I'm a huge fan of mod_wsgi and how easy it is to administrate, but this just goes to show that even subtle configuration decisions can have an impact. Graham Dumpleton can't read my mind, unfortunately.&lt;/p&gt;
 &lt;p&gt;Our solution was to increase the maximum-requests value to 10k. This should cut down the number of dropped requests by 20x. We've got quite a bit of extra RAM, so this seems like an easy fix.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/intermittent-timeouts-with-modwsgi/munin.png&quot; alt=&quot;munin memory usage&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/intermittent-timeouts-with-modwsgi/munin.png&quot; alt=&quot;munin memory usage&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;We'll also be monitoring memory usage using &lt;a href=&quot;http://munin-monitoring.org/&quot;&gt;Munin&lt;/a&gt;&amp;nbsp;and if it appears that memory leaks are not actually a problem for our application, we'll consider upping the maximum-requests value even further. Perhaps we can even eliminate maximum-requests entirely in favor of using our normal alerting and monitoring system to notify us in case mod_wsgi memory usage hits an unacceptable threshold.&lt;/p&gt;
 &lt;p&gt;It seems that maybe the mod_wsgi documentation could benefit from a quick blurb about this side-effect of maximum-requests, so I opened a &lt;a href=&quot;http://code.google.com/p/modwsgi/issues/detail?id=218&quot;&gt;mod_wsgi issue&lt;/a&gt; for a documentation enhancement.&lt;/p&gt;
 </content>
@@ -341,9 +341,9 @@ $ sudo service mysql start&lt;/pre&gt;
   
   <entry>
     <title>PHP to Django: Changing the engine while the car is running</title>
-    <link href="http://devblog.policystat.comphp-to-django-changing-the-engine-while-the-c"/>
+    <link href="http://devblog.policystat.com/php-to-django-changing-the-engine-while-the-c"/>
     <updated>2010-11-15T15:07:00-05:00</updated>
-    <id>http://devblog.policystat.com./php-to-django</id>
+    <id>http://devblog.policystat.com/./php-to-django</id>
     <content type="html">&lt;p&gt;It's pretty widely known that web frameworks like
 &lt;a href=&quot;http://djangoproject.com&quot;&gt;Django&lt;/a&gt; and &lt;a href=&quot;http://rubyonrails.org&quot;&gt;Ruby on Rails&lt;/a&gt;
 are amazing. They give developers the ability to build applications quickly and
@@ -359,7 +359,7 @@ prototype. There were 45 .php files in a folder with one file called
 class.main.php. No templates. No classes. No consistent database access. No
 MVC. No ORM. No tests.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/php-to-django/first_commit.png.scaled500.png&quot; alt=&quot;First Commit&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/php-to-django/first_commit.png.scaled500.png&quot; alt=&quot;First Commit&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Once our prototype took off and we realized there was a strong market for
 policy management software done exactly the way we wanted to do it, we had a
@@ -429,7 +429,7 @@ removed the last bit of PHP. It was a very, very, very happy day for the
 development team. To our customers though, it was just another update. That's a
 good thing :)&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/php-to-django/last_php.png&quot; alt=&quot;last php removal&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/php-to-django/last_php.png&quot; alt=&quot;last php removal&quot; /&gt;&lt;/p&gt;
 
 &lt;h2&gt;Notes&lt;/h2&gt;
 
@@ -446,16 +446,16 @@ apache vhost file looked like.&lt;/li&gt;
 &lt;/ul&gt;
 
 
-&lt;p&gt;Edit: Finally finished the follow-up post with technical details on &lt;a href=&quot;http://devblog.policystat.com/php-to-django-how-we-did-it&quot;&gt;migrating
+&lt;p&gt;Edit: Finally finished the follow-up post with technical details on &lt;a href=&quot;http://devblog.policystat.com//php-to-django-how-we-did-it&quot;&gt;migrating
 from php to django&lt;/a&gt;.&lt;/p&gt;
 </content>
   </entry>
   
   <entry>
     <title>Network latency between ec2 instances: public vs private IP and same vs different availability zone</title>
-    <link href="http://devblog.policystat.comnetwork-latency-between-ec2-instances-public"/>
+    <link href="http://devblog.policystat.com/network-latency-between-ec2-instances-public"/>
     <updated>2010-11-09T15:07:00-05:00</updated>
-    <id>http://devblog.policystat.com./network-latency-between-ec2-instances</id>
+    <id>http://devblog.policystat.com/./network-latency-between-ec2-instances</id>
     <content type="html">&lt;h2&gt;How Realistic is Your ec2 =&amp;gt; ec2 Load Test?&lt;/h2&gt;
 &lt;p&gt;Today I was reading about a cool distributed load-testing tool called &lt;a href=&quot;http://blog.apps.chicagotribune.com/2010/07/08/bees-with-machine-guns/&quot;&gt;Bees With Machine Guns&lt;/a&gt;&amp;nbsp;(awesome name) and a commenter asked how testing ec2 to ec2 might affect the load test. After all, real clients aren't going to have local network connection speeds to your application, which is going to change the characteristics of how your application responds. With slow clients you get increased resource usage depending on your setup and you'd probably like to know whether or not putting that reverse proxy in front of your application server actually helps.&lt;/p&gt;
 &lt;p&gt;I was going to suggest in the comments that using a different availability zone would actually solve the problem, but then I realized I was just guessing. So I ran some simple, unscientific tests.&lt;/p&gt;
@@ -516,9 +516,9 @@ rtt min/avg/max/mdev = 81.517/81.672/82.059/0.281 ms
   
   <entry>
     <title>DevOps at Our Startup</title>
-    <link href="http://devblog.policystat.com/devops-at-our-startup/"/>
+    <link href="http://devblog.policystat.com//devops-at-our-startup/"/>
     <updated>2010-10-14T16:54:00-04:00</updated>
-    <id>http://devblog.policystat.com/devops-at-our-startup</id>
+    <id>http://devblog.policystat.com//devops-at-our-startup</id>
     <content type="html">&lt;p&gt;The guys at &lt;a href=&quot;http://devopscafe.org/&quot;&gt;DevOps Cafe&lt;/a&gt; have been preaching the
 gospel of sharing in operations, and I've been agreeing as loudly as possible.
 This is my first step towards putting up (instead of shutting up).&lt;/p&gt;
@@ -599,7 +599,7 @@ conjunction with unit tests) to solve the same problem. Now all our code
 changes require accompanying selenium tests and we don't have the kind of bugs
 that manual tests would have caught. We also run these tests many times per
 day, which means we know on an hourly basis what our quality looks like.
-&lt;img src=&quot;http://devblog.policystat.com/images/posts/devops-at-our-startup/selenium_hudson.png&quot; alt=&quot;hudson_status&quot; /&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;img src=&quot;http://devblog.policystat.com//images/posts/devops-at-our-startup/selenium_hudson.png&quot; alt=&quot;hudson_status&quot; /&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;Lengthening your release cycle might seem like a good idea, but if that's all
 you're changing, it's just as likely to cause &lt;em&gt;lower&lt;/em&gt; quality as it is to
 raise quality. Instead of building the minimum set of features and iterating
@@ -640,7 +640,7 @@ single-digit utilization for the larger, more-complicated group collaboration
 feature. Our devops problem cost us ~10 weeks of desperately-valuable
 development time that our business and customers needed.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/devops-at-our-startup/collab_usage.png&quot; alt=&quot;usage
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com//images/posts/devops-at-our-startup/collab_usage.png&quot; alt=&quot;usage
 graph&quot; /&gt;&lt;/p&gt;
 
 &lt;h2&gt;Another Solution, Almost as Bad&lt;/h2&gt;
