@@ -1,0 +1,682 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title>PolicyStat's Dev Blog</title>
+  <link href="http://devblog.policystat.com/atom.xml" rel="self"/>
+  <link href="http://devblog.policystat.com/"/>
+  <updated>2011-09-12T14:07:28-04:00</updated>
+  <id>http://devblog.policystat.com/</id>
+  <author>
+    <name>PolicyStat LLC</name>
+    
+  </author>
+
+  
+  <entry>
+    <title>Where are the magic deployment tools?</title>
+    <link href="http://devblog.policystat.comwhere-are-the-magic-deployment-tools"/>
+    <updated>2011-08-25T15:07:00-04:00</updated>
+    <id>http://devblog.policystat.com./where-are-the-magic-deployment-tools</id>
+    <content type="html">&lt;p&gt;This is a cross-post + Edit of my comment on a blog post by &lt;a href=&quot;http://twitter.com/lusis&quot;&gt;@lusis&lt;/a&gt; on &lt;a href=&quot;http://blog.lusis.org/blog/2011/08/22/the-configuration-management-divide/&quot;&gt;The Configuration Management Divide&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;Deployment is Not a Solved Problem&lt;/h2&gt;
+&lt;p&gt;From a developer's perspective, CM is definitely not a solved problem in general. It's solved for people using a PaaS provider like &lt;a href=&quot;http://www.heroku.com/&quot;&gt;heroku&lt;/a&gt; (until you hit a limit) and it's solved for developers in shops where someone has written a custom tool to make it easy (sounds like &lt;a href=&quot;https://github.com/etsy/deployinator&quot;&gt;Deployinator&lt;/a&gt; at Etsy is an example).&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;As a developer, I want two things from CM:&lt;/p&gt;
+&lt;h3&gt;I want to test something locally and then programmatically capture that setup in a way I can easy replicate.&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;Chef + Vagrant seems very close to solving this problem, but the reality is that adoption isn't super high yet. It's also surprisingly hard to get &amp;nbsp;developers (in my experience) to care about the advantages of writing/using/modifying Chef cookbooks/roles instead of Fabric or python scripts. In general though, I don't see any gaps in Chef + Vagrant for solving this part of the problem. They're both getting better and I see the day when the average new-hire experience at the average software company involves getting your laptop and running one command for an instant local mirror of the production setup.&lt;/p&gt;
+&lt;pre&gt;git clone git://foo bar &amp;amp;&amp;amp; cd bar &amp;amp;&amp;amp; vagrant up&lt;/pre&gt;
+&lt;p&gt;Boom. No wiki. No checklist. No crash errors because it's been two months since the last time someone tried to set up a fresh machine.&lt;/p&gt;
+&lt;h3&gt;I want to run one command to deploy and I want it to magically work and work very quickly.&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;This is the part that I see as unsolved in a general case (again, outside certain PaaS providers and proprietary scripts within companies). Deploying in production doesn't just mean &quot;make these 8 nodes have this configuration,&quot; but that's the problem I see that's well-solved with Chef Server, Puppet, Cloud Foundry (could be wrong here, only have 2 days of experience). The magic deploy that you need to get a python web app updated using AWS &amp;nbsp;involves: &amp;nbsp;&lt;/p&gt;
+&lt;ol&gt;
+    &lt;li&gt;Doing verification on the code to make sure I'm on a tagged, pushed version of the code in git and that I've passed the required tests&lt;/li&gt;
+    &lt;li&gt;Writing to a chat room to let people know a deploy is happening + random other one-off things unrelated to the actual deploy process&lt;/li&gt;
+    &lt;li&gt;Checking that all of the nodes I need actually exist, are bootstrapped and have basic monitoring (there are good tools for doing this part now)&lt;/li&gt;
+    &lt;li&gt;Gathering all of the data about nodes in your system to pass around like URLs to memcached servers (tools like Noah are good here I think)&lt;/li&gt;
+    &lt;li&gt;Pulling a test node out of the load balancer&lt;/li&gt;
+    &lt;li&gt;Configuring that node (chef solo is awesome for this now), running migrations, keeping things versioned for rollback, and all of the single-node deployment things that are well-addressed by tools&lt;/li&gt;
+    &lt;li&gt;Testing the health of that node, putting it back in the load balancer and making sure things don't blow up&lt;/li&gt;
+    &lt;li&gt;Gradually repeating the out-of-loadbalancer, configure, test, back-in-load-balancer steps for the rest of the nodes&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Then you've got lots of other details like creating dev/staging versions with different configs, pulling in live data for testing, versioning static media, rollback, forward-compatible schema migrations (and testing that), continuous integration, trade-offs in speed/flexibility in how much you put in your AMIs, monitoring, etc. Also, it should be fast or a developer will start avoiding extra deploys by batching them.&lt;/p&gt;
+&lt;p&gt;It seems like every production python web app (and I think Ruby, Node.js, PHP etc) needs to do all of these boringish things, but everyone has had to cobble together their own solution. I'm absolutely for unix-style single purpose tools, but if there's something out there that aims to generally solve the deploy part of the configuration management problem, I'm missing it.&lt;/p&gt;
+&lt;h2&gt;Everyone Deploys&lt;/h2&gt;
+&lt;p&gt;Every company with a production web app has had to deal with these problems. In a startup, that usually means you start with all of the problems and only solve one at a time and only as you need to. Why are we all re-inventing this wheel and where are the open source projects trying to solve this problem?&lt;/p&gt;
+&lt;p&gt;Everyone should be able to:&lt;/p&gt;
+&lt;pre&gt;foo deploy:live active up&lt;/pre&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Run MySQL From a RAM Disk in Ubuntu Linux</title>
+    <link href="http://devblog.policystat.comrun-mysql-from-a-ram-disk-in-ubuntu"/>
+    <updated>2011-08-12T15:07:00-04:00</updated>
+    <id>http://devblog.policystat.com./run-mysql-from-a-ram-disk-in-ubuntu-linux</id>
+    <content type="html">&lt;p&gt;Here at PolicyStat, we heavily rely on unit tests, selenium tests and continuous integration to keep our quality up so that we can practice continuous delivery. That means we write a lot of tests and we run a lot of tests. A major source of frustration is the painfully &lt;strong&gt;bad MySQL performance&lt;/strong&gt; during tests&amp;nbsp;because of table creation overhead. One option we considered was to use the Memory storage engine in MySQL, but you lose some capabilities (blob and text columns) and you're no-longer testing your actual database.&lt;/p&gt;
+&lt;p&gt;Yesterday, I finally bit the bullet and figured out how to &lt;strong&gt;configure MySQL to run on a ramdisk&lt;/strong&gt;.&lt;/p&gt;
+&lt;h2&gt;Results&lt;/h2&gt;
+&lt;p&gt;RAMdisks are fast, but we really only saw big performance improvements when compared to an ext4 filesystem on a conventional hdd. Compared to solid state disks with XFS or ext3, the RAMdisk only gave &lt;strong&gt;marginal performance improvements&lt;/strong&gt;.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://chart.apis.google.com/chart?chxl=1:|ext3|RAMdisk&amp;amp;chxr=0,2000,4200&amp;amp;chxt=x,y&amp;amp;chbh=a&amp;amp;chs=420x240&amp;amp;cht=bhs&amp;amp;chco=4D89F9&amp;amp;chds=0,4117&amp;amp;chd=t:3650,4117&amp;amp;chtt=Test+Suite+Run+Time+(s)&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;I ran our full &lt;a href=&quot;https://github.com/winhamwr/nosedjango&quot;&gt;nosedjango&lt;/a&gt;-based test suite of 1340 tests on our ec2-based Hudson slaves. One of the slaves had the RAMdisk fix and the other was just using standard ec2 ephemeral storage with an ext3 filesystem.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ext3- &lt;strong&gt;4117&lt;/strong&gt; seconds&lt;/li&gt;
+&lt;li&gt;RAMdisk- &lt;strong&gt;3650&lt;/strong&gt; seconds&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The RAMdisk gave us an &lt;strong&gt;11%&lt;/strong&gt; performance improvement. Our test suite relies very heavily on fixtures, so this tells me that our test suite is basically &lt;strong&gt;CPU-bound&lt;/strong&gt;. Results on ext4 would be more dramatic and so would results on I/O-bound test suites.&lt;/p&gt;
+&lt;h2&gt;Caveats&lt;/h2&gt;
+&lt;p&gt;These instructions worked on two different Ubuntu 10.04 machines, but I haven't tried it on other distros/versions. If someone can try this on another version and let me know the results, I would love to update the instructions. Also, you should understand what a &lt;a href=&quot;http://en.wikipedia.org/wiki/RAM_disk&quot;&gt;RAMdisk&lt;/a&gt; actually is before proceeding. The main points are that your data will be lost on restart and if you don't actually have free RAM, you won't get much of a benefit.&lt;/p&gt;
+&lt;h2&gt;Instructions&lt;/h2&gt;
+&lt;p&gt;After a lot of unfruitful googling, I found &lt;a href=&quot;http://stackoverflow.com/questions/3096148/how-to-run-djangos-test-database-only-in-memory/4437821#4437821&quot;&gt;this stackoverflow answer&lt;/a&gt;&amp;nbsp;with some simple instructions. They got me most of the way there, but didn't quite work on my system.&lt;/p&gt;
+&lt;p&gt;The following instructions got a working MySQL instance running on a RAMdisk.&lt;/p&gt;
+&lt;h3&gt;1 Stop MySQL&lt;/h3&gt;
+&lt;p&gt;We're going to be copying the raw mysql data files, and we need them in a consistent state.&lt;/p&gt;
+&lt;pre&gt;$ sudo service mysql stop&lt;/pre&gt;
+&lt;h3&gt;2 Copy your MySQL data directory to the RAMdisk&lt;/h3&gt;
+&lt;p&gt;By default, all of MySQL's data is stored in /var/lib/mysql and that's the folder that needs to be fast. Ubuntu has a RAMdisk located at &lt;em&gt;/dev/shm&lt;/em&gt; by default, so we're going to use that. We also want to preserve the permissions on the files so that MySQL can access them.&lt;/p&gt;
+&lt;pre&gt;$ sudo cp -pRL /var/lib/mysql /dev/shm/mysql&lt;/pre&gt;
+&lt;h3&gt;3 Update your mysqld configuration&lt;/h3&gt;
+&lt;p&gt;Now we need to tell mysqld to actually use our new data directory. This setting is &quot;datadir&quot; located in &lt;em&gt;/etc/mysql/my.conf&lt;/em&gt; under the [mysqld] section. Change yours to:&lt;/p&gt;
+&lt;pre&gt;# datadir = /var/lib/mysql
+# Using a RAMdisk
+datadir = /dev/shm/mysql
+&lt;/pre&gt;
+&lt;h3&gt;4 Update your apparmor profile&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/AppArmor&quot;&gt;AppArmor&lt;/a&gt;&amp;nbsp;is great for keeping programs isolated for security purposes, but it also means that seemingly-small changes can cause AppArmor to break your program. By default, the mysql-server install comes with an AppArmor profile that locks mysqld to a specific set of files. &lt;em&gt;/dev/shm/mysql&lt;/em&gt; isn't in the default profile (obviously), so we need to add it.&lt;/p&gt;
+&lt;p&gt;First, open &lt;em&gt;/etc/apparmor.d/usr.sbin.mysqld&lt;/em&gt; with your favorite text editor:&lt;/p&gt;
+&lt;pre&gt;$ sudo vim /etc/apparmor.d/usr.sbin.mysqld&lt;/pre&gt;
+&lt;p&gt;Then add the following lines inside the &quot;/usr/sbin/mysqld&quot; section (between the braces):&lt;/p&gt;
+&lt;pre&gt;/dev/shm/mysql/ r,
+/dev/shm/mysql/** rwk,
+&lt;/pre&gt;
+&lt;h3&gt;5 Restart apparmor and MySQL&lt;/h3&gt;
+&lt;p&gt;And if everything has gone well, we just need to restart our services and get on to our much-faster testing.&lt;/p&gt;
+&lt;pre&gt;$ sudo service apparmor restart
+$ sudo service mysql start&lt;/pre&gt;
+&lt;h2&gt;Results&lt;/h2&gt;
+&lt;p&gt;If you're using ext4 for your hard drive, you should see a *huge* performance improvement with a ramdisk. &lt;a href=&quot;http://devblog.policystat.com/authors/christian&quot;&gt;Christian's&lt;/a&gt; single selenium testcase run went from several painful minutes to 17 seconds. ext4 is a bit more paranoid about ensuring that changes are actually flushed to disc versus ext3, so you see a very large performance hit doing database and table creation. That means the gains from a RAMdisk are more dramatic.&lt;/p&gt;
+&lt;p&gt;TODO: I have plans to create an upstart script to manage the process of copying data to the RAMdisk on every boot, but for now you'll need to do that manually every reboot.&lt;/p&gt;
+&lt;h2&gt;Troubleshooting&lt;/h2&gt;
+&lt;h3&gt;Not enough RAM (ibdata1 file is too big)&lt;/h3&gt;
+&lt;p&gt;By default when using innodb, the /var/lib/mysql/ibdata1 file grows and grows, even after you delete all of your database. In our case, Christian's ibdata1 file was &amp;gt;300MB for no particular reason. This stackoverflow question explains &lt;a href=&quot;http://stackoverflow.com/questions/3456159/how-to-shrink-purge-ibdata1-file-in-mysql&quot;&gt;how to shrink your ibdata1 file&lt;/a&gt;.&amp;nbsp;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>PolicyPad: Etherpad + Bring Your Own Editor</title>
+    <link href="http://devblog.policystat.compolicypad-real-time-collaboration-through-you"/>
+    <updated>2011-05-16T15:07:00-04:00</updated>
+    <id>http://devblog.policystat.com./policypad-real-time-collaboration</id>
+    <content type="html">&lt;h2&gt;Real-time In-Browser Collaboration&lt;/h2&gt;
+&lt;p&gt;Real-time collaborative document editing in a web browser is hard. Google docs can do it, &lt;a href=&quot;http://etherpad.org/&quot;&gt;EtherPad&lt;/a&gt;&amp;nbsp;can do it, but can your app do it? &lt;a href=&quot;http://policypad.readthedocs.org/&quot;&gt;PolicyPad&lt;/a&gt; is a tool allowing you to make it happen using your existing javascript-based editor.&amp;nbsp;Thanks to the dedicated work of a small team of &lt;a href=&quot;http://www.rose-hulman.edu/&quot;&gt;Rose-Hulman Institute of Technology&lt;/a&gt; students (primarily &lt;a href=&quot;http://twitter.com/jetheis&quot;&gt;Jimmy Theis&lt;/a&gt;&amp;nbsp;and &lt;a href=&quot;https://github.com/wellsie1116&quot;&gt;Kevin Wells&lt;/a&gt;), we've put together a &lt;a href=&quot;http://policypad.pstattest.com/static/PolicyPad/demos/wymeditor/launcher.html&quot;&gt;demo&lt;/a&gt; with &lt;a href=&quot;https://github.com/PolicyStat/PolicyPad&quot;&gt;github'd source&lt;/a&gt;&amp;nbsp;demonstrating real-time collaboration using the standards-focused &lt;a href=&quot;http://www.wymeditor.org/&quot;&gt;WYMeditor&lt;/a&gt;&amp;nbsp;(What You Mean editor).&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;PolicyPad is a library to help use any existing javascript-based editor in front of EtherPad to add real-time collaboration. This potentially allows your existing application, with all of your custom editor add-ons and integration, to add the goodness of Etherpad without the need to implement a complex server-side solution for diffing, version control, retrieval, etc.&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;PolicyPad Architecture&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/policypad/architecture.png&quot; alt=&quot;PolicyPad architecture diagram&quot; /&gt;&lt;/p&gt;
+&lt;h2&gt;Future&lt;/h2&gt;
+&lt;p&gt;Right now, the code is working well with WYMeditor, but we'd really like to add plugins for other editors, such as &lt;a href=&quot;http://tinymce.moxiecode.com/&quot;&gt;TinyMCE&lt;/a&gt;&amp;nbsp;and &lt;a href=&quot;http://ckeditor.com/&quot;&gt;CKEditor&lt;/a&gt;. We'd also like to fill the existing gaps where the default Etherpad editor provides functionality that we don't yet mimick (real-time chat, stepping back through old versions, import/export).&lt;/p&gt;
+&lt;h2&gt;Get Involved:&lt;/h2&gt;
+&lt;ul&gt;
+    &lt;li&gt;&lt;a href=&quot;https://github.com/PolicyStat/PolicyPad&quot;&gt;Github Project&lt;/a&gt; (pull requests welcome)&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;https://github.com/PolicyStat/PolicyPad/issues&quot;&gt;Issue Tracker&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;http://groups.google.com/group/policypad&quot;&gt;Google Group&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;https://convore.com/policypad/&quot;&gt;Convore Group&lt;/a&gt; (chatroom)&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;http://policypad.pstattest.com/static/PolicyPad/demos/wymeditor/launcher.html&quot;&gt;Demo Using WYMeditor&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Today's Amazon ec2 EBS Outage in a Graph</title>
+    <link href="http://devblog.policystat.comtodays-amazon-ec2-ebs-outage-in-a-graph"/>
+    <updated>2011-04-21T15:07:00-04:00</updated>
+    <id>http://devblog.policystat.com./todays-amazon-ec2-ebs-outage-in-a-graph</id>
+    <content type="html">&lt;p&gt;
+    &lt;img src=&quot;http://devblog.policystat.com/images/posts/todays-amazon-ec2-ebs-outage/munin.png&quot; alt=&quot;munin disk throughput graph ebs&quot; /&gt;
+&lt;/p&gt;
+&lt;p&gt;You can clearly see the sharp dropoffs in disk throughput as the EBS volume goes in and out of availability. This is a high-cpu medium instance in US East 1b with 1 10GB EBS volume attached.&lt;/p&gt;
+&lt;p&gt;Good news though, I learned a new euphemism for &quot;Stuff is Broke&quot;: &lt;strong&gt;Increased Latency&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Defaulting on a mortgage:&lt;/p&gt;
+&lt;blockquote&gt;
+    &lt;p&gt;We are experiencing increased latency affecting several housing-related financial obligations.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The Vietnam war:&lt;/p&gt;
+&lt;blockquote&gt;
+    &lt;p&gt;We are currently investigating increased latency surrounding our police action.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Chernobyl:&lt;/p&gt;
+&lt;blockquote&gt;
+    &lt;p&gt;We can confirm the existence of increased latency surrounding the separation of nuclear fallout from the surrounding wildlife.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Joking aside, I feel like this outage illustrates the &lt;strong&gt;upside of the cloud&lt;/strong&gt;, contrary to some other accounts I'm reading. From what I can tell, Amazon experienced an outage in 2 of 4 availability zones (with degraded service in the others, presumably) within 1 of 5 regions. Datacenter outages happen, and sometimes they cluster. The alternative scenario where two of your co-location providers or two pieces of critical hardware goes down means you are 100% going to experience downtime.&amp;nbsp;With ec2, moving your entire operations from affected datacenters x and y to unaffected a and b can literally be one command away. We're all practicing infrastructure as code right?&lt;/p&gt;
+&lt;p&gt;In our case, we have application servers load-balanced across both 1b and 1d with an RDS multi-az master in 1b. The DB automatically failed over last night, and the load balancer automatically took the degraded 1b instances out of rotation as soon as they stopped responding. Unfortunately, the working application servers had a little trouble switching connections to the new master Database due to DNS caching (which we'll be fixing). The takeaway though, what could have been a 12-hour (and counting) outage was measured in minutes instead because of the tools AWS makes availlable at low cost.&lt;/p&gt;
+&lt;p&gt;Of course, I still had a monitoring alert hit my cell at 4am and not sleeping is kind of a bummer, but I'll take &lt;strong&gt;Mean Time to Recover + distributed risk over Mean Time Between Failures + concentrated risk&lt;/strong&gt; any day.&amp;nbsp;&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>PHP to Django: How we did it</title>
+    <link href="http://devblog.policystat.comphp-to-django-how-we-did-it"/>
+    <updated>2011-03-25T15:07:00-04:00</updated>
+    <id>http://devblog.policystat.com./php-to-django-how-we-did-it</id>
+    <content type="html">&lt;h2&gt;Only Took me Four Months&lt;/h2&gt;
+&lt;p&gt;Back in November I wrote about our slow journey from &lt;a href=&quot;http://devblog.policystat.com/php-to-django-changing-the-engine-while-the-c&quot;&gt;PHP to Django&lt;/a&gt;. Our startup went from a 100% PHP application to 100% Django over 22 months, with the two sides coexisting in production. We slowly made the conversion while also improving our product with new features, bug fixes and polish all around. From the response to that post, it seems like this might be a problem that other people have had or are having and at least a few people wanted more details.&lt;/p&gt;
+&lt;p&gt;So here I am putting code where my mouth is.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/php-to-django-how-we-did-it/first_commit.png&quot; alt=&quot;first django-php-bridge commit&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;This post is an introduction to the &lt;a href=&quot;https://github.com/winhamwr/django-php-bridge&quot;&gt;django-php-bridge&lt;/a&gt; project and a more technical discussion of how we made the transition.&lt;/p&gt;
+&lt;h2&gt;Introducing Django-PHP-Bridge&lt;/h2&gt;
+&lt;p&gt;The goal of django-php-bridge is to make it easier for PHP projects and Django projects to live side by side, passing authenticated users back and forth seemlessly.&lt;/p&gt;
+&lt;p&gt;I see four different cases where it makes sense to have Django and PHP projects living side by side:&lt;/p&gt;
+&lt;ol&gt;
+    &lt;li&gt;You want to convert your PHP app to Django, but you realize how *ahem* stupid it would be to live in a coding bubble for a few months to rewrite things. Your customers want you to innovate and your competitors won't wait for you.&lt;/li&gt;
+    &lt;li&gt;You want to convert your Django app to PHP. I'm not sure why you would do this, but I know that someone somewhere has this need.&lt;/li&gt;
+    &lt;li&gt;You have legacy Django and/or PHP applications that you want to mash together for a better user experience.&lt;/li&gt;
+    &lt;li&gt;You have a real reason to build an application using two different technologies.&amp;nbsp;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;We want to help make it easier to do all of those things by providing glue code, documentation and utilities. When we made the transition at PolicyStat, it was pretty rough finding any information and I feel like we wrote a lot of code that other people had already written, code that has since been re-written many times&lt;/p&gt;
+&lt;h2&gt;Django &amp;lt; == &amp;gt; PHP Under the Hood&lt;/h2&gt;
+&lt;p&gt;The integration has just a few major components:&lt;/p&gt;
+&lt;ul&gt;
+    &lt;li&gt;Session serialization&lt;/li&gt;
+    &lt;li&gt;Session storage&lt;/li&gt;
+    &lt;li&gt;User schema&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Session Serialization&lt;/h3&gt;
+&lt;p&gt;The absolute core piece to the whole integration is &lt;a href=&quot;https://github.com/winhamwr/django-php-bridge/blob/master/django_php_bridge/backends/db.py&quot;&gt;django_php_bridge.backends.db&lt;/a&gt;, the Django session backend that speaks PHP's serialization format.&amp;nbsp;&lt;a href=&quot;http://twitter.com/mitsuhiko&quot;&gt;Armin Ronacher's&lt;/a&gt;&amp;nbsp;wonderful &lt;a href=&quot;http://pypi.python.org/pypi/phpserialize&quot;&gt;PHPSerialize&lt;/a&gt;&amp;nbsp;library does the bulk of the heavy lifting here. Basically, we're using the normal Django database-backed session backend, only we're serializing all of the session data to the format that PHP expects.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Session Storage&lt;/h3&gt;
+&lt;p&gt;On the other side of that integration, we need to make sure that the PHP side knows how to grab and create session data in the DB table. Luckily, PHP has what are basically pluggable session backends. I submitted a stripped down version of the backend that we use in contrib:&amp;nbsp;&lt;a href=&quot;https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/djangoSession.class.php&quot;&gt;https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/djangoSession.class.php&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;User Schema&lt;/h3&gt;
+&lt;p&gt;Now that we have both sides speaking the same language with regards to sessions, we need to make them both understand users. The key here is that you have to agree on the schema for your user data. In this case, I think it makes the most sense to follow Django's built-in User model along with their Profile system because not doing so shuts you out of a lot of re-usable Django applications.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Once you've decided to use the Django schema for users, you have a conversion script to write to take your existing schema and map it to Django's. One wrinkle here is that you will probably need to move around password hashes, which could be a major pain. Luckily, Django's &lt;a href=&quot;http://docs.djangoproject.com/en/1.3/topics/auth/#passwords&quot;&gt;password documentation&lt;/a&gt;&amp;nbsp;explains the way the hash is stored and it's stored in a very flexible manner. So if you weren't using a salt or maybe were using a different hash algorithm, Django has your back and our example PHP user object has functions for hashing and unhashing django-style passwords.&lt;/p&gt;
+&lt;p&gt;Once you have your User and Profile objects converted over, you'll need to change your PHP application to respect that new schema. Depending on what PHP framework you're using and on how your PHP code is structured, this could be as simple as changing one class, or it could be very difficult. Regardless, I've included a very simple, not awesome example of what this might look like in PHP culled from our actual codebase:&amp;nbsp;&lt;a href=&quot;https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/user.class.php&quot;&gt;https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/user.class.php&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Future Direction&lt;/h2&gt;
+&lt;p&gt;I would absolutely love to see some contributions with examples of how to use the serialization backend with specific PHP frameworks like CakePHP and Symfony. One of the strengths of PHPs is the ability to rig things together in an ad-hoc way to build what you need. Unfortunately, that comes back to bite us when we're trying to give instructions on how to do basically anything with a &quot;PHP application&quot; because that doesn't really have much meaning from a code/structure/architecture perspective. The PHP frameworks generally solve that lack of structure and will hopefully allow us to build some PHP code that's actually re-usable in the general case.&lt;/p&gt;
+&lt;p&gt;We're no longer using any PHP at PolicyStat, and I don't have much passion to write much more PHP in my spare time, but I'd very much like to help where I can with python code, documentation and the curation of PHP submissions. If you've already built this kind of Django to PHP integration using one of the PHP frameworks like CakePHP, I'd especially love to add your code to the project.&lt;/p&gt;
+&lt;h2&gt;Pull Requests Wanted&lt;/h2&gt;
+&lt;p&gt;I'd welcome any feedback as far as what other people solving this problem would like to see. What would be helpful? I'd also really like to accept contributions with documentaiton, utilities, examples and anything else that would make it easier for someone to build a Django project that lives side by side with a PHP project. Any ideas at all, feel free to ping me on twitter &lt;a href=&quot;http://twitter.com/weswinham&quot;&gt;@weswinham&lt;/a&gt; and please fork &lt;a href=&quot;https://github.com/winhamwr/django-php-bridge&quot;&gt;django-php-bridge on github&lt;/a&gt;.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Using django-mailer with django-ses for Amazon SES goodness</title>
+    <link href="http://devblog.policystat.comusing-django-mailer-with-django-ses-for-amazo"/>
+    <updated>2011-03-08T15:07:00-05:00</updated>
+    <id>http://devblog.policystat.com./using-django-mailer-with-django-ses</id>
+    <content type="html">&lt;p&gt;Amazon's new &lt;a href=&quot;http://aws.amazon.com/ses/&quot;&gt;Simple Email Service&lt;/a&gt; is pretty awesome.&lt;/p&gt;
+&lt;p&gt;Previously, there were basically two options:&lt;/p&gt;
+&lt;ol&gt;
+    &lt;li&gt;Pay out the wazoo per message&lt;/li&gt;
+    &lt;li&gt;Hassle with setting up a mail server and continuously wrangle with the email world to avoid spam filters&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+    &lt;img src=&quot;http://devblog.policystat.com/images/posts/using-django-mailer-with-django-ses/spam.jpg&quot; alt=&quot;spam&quot; /&gt;
+&lt;/p&gt;
+&lt;p&gt;With SES, you avoid the hassle of deliverability and you get 2k messages per day for free with 1 penny per hundred messages over that.&lt;/p&gt;
+&lt;p&gt;At PolicyStat, we use &lt;a href=&quot;http://pypi.python.org/pypi/django-mailer/0.1.0&quot;&gt;django-mailer&lt;/a&gt;&amp;nbsp;to queue up emails for sending so that we don't need to make an SMTP connection inside the request/response cycle. It also gives us nice logging and do-not-send abilities and we wanted to keep those. We also really wanted to use SES.&lt;/p&gt;
+&lt;p&gt;Luckily, as is usually the case with the Python and Django community, in the ~2 weeks between the SES announcement and the time we wanted to implement, the wonderful community around &lt;a href=&quot;https://github.com/boto/boto&quot;&gt;Boto&lt;/a&gt; had already grown SES support and a gentlemen named &lt;a href=&quot;http://hmarr.com/&quot;&gt;Harry Marr&lt;/a&gt; out of the UK had created a &lt;a href=&quot;https://github.com/hmarr/django-ses&quot;&gt;Django app for SES Email&lt;/a&gt; called django-SES.&lt;/p&gt;
+&lt;p&gt;The integration was painless for us thanks to &lt;a href=&quot;http://docs.djangoproject.com/en/dev/releases/1.2/#e-mail-backends&quot;&gt;Django 1.2's email backend support&lt;/a&gt;. The problem we ran in to was that django-mailer was specifically designed for use with SMTP-based email sending. In the &lt;code&gt;send_all()&lt;/code&gt; function used for sending all of the emails in your queue, there was code like:&lt;/p&gt;
+&lt;pre&gt;except (socket_error, smtplib.SMTPSenderRefused, smtplib.SMTPRecipientsRefused, smtplib.SMTPAuthenticationError), err:
+                mark_as_deferred(message, err)
+                deferred += 1
+&lt;/pre&gt;
+&lt;p&gt;This worked great for SMTP sending. If a message failed for any of the expected reasons, that message was deferred for later (in case of a temporary problem) and the function kept chugging through the rest of the queue. With django-ses and boto though, you don't get SMTP errors. You get things that look like:&lt;/p&gt;
+&lt;pre&gt;400 Bad Request
+&amp;lt;ErrorResponse xmlns=&quot;http://ses.amazonaws.com/doc/2010-12-01/&quot;&amp;gt;
+  &amp;lt;Error&amp;gt;
+    &amp;lt;Type&amp;gt;Sender&amp;lt;/Type&amp;gt;
+    &amp;lt;Code&amp;gt;MessageRejected&amp;lt;/Code&amp;gt;
+    &amp;lt;Message&amp;gt;Address blacklisted.&amp;lt;/Message&amp;gt;
+  &amp;lt;/Error&amp;gt;
+  &amp;lt;RequestId&amp;gt;eb0e8eda-48c2-11e0-8b2e-91b9805ad73d&amp;lt;/RequestId&amp;gt;
+&amp;lt;/ErrorResponse&amp;gt;
+&lt;/pre&gt;
+&lt;p&gt;When this happens, the &lt;code&gt;send_all&lt;/code&gt; function fails out, your message isn't deferred and all emails after this one are effectively blocked. That's bad.&lt;/p&gt;
+&lt;p&gt;Our fix, after experimenting with the bad idea of &lt;a href=&quot;https://github.com/winhamwr/django-ses/commit/7f1ec14ade17dccbc9c2af52565f10a6859fd15b&quot;&gt;wrapping Boto exceptions in SMTP exceptions&lt;/a&gt;, was to simply use a bare &lt;code&gt;except:&lt;/code&gt; statement for &lt;code&gt;send_all()&lt;/code&gt;. Now SES errors don't block our queue and we're back to being happy. We're using our &lt;a href=&quot;https://github.com/winhamwr/django-mailer&quot;&gt;django-ses compatible django-mailer fork&lt;/a&gt; in production right now.&lt;/p&gt;
+&lt;p&gt;Next step will be to find a way to automatically handle &quot;Address blacklisted&quot; messages, but that's for another day. I'm just happy to stop our ghetto system of getting a pagerduty notification at 3am and manually rotating our SMTP user in production as we hit our quota. Thank you SES, boto, django-ses and django-mailer for taking back my sleep time.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Structure Aware Change Tracking</title>
+    <link href="http://devblog.policystat.comstructure-aware-change-tracking"/>
+    <updated>2011-02-17T15:07:00-05:00</updated>
+    <id>http://devblog.policystat.com./structure-aware-change-tracking</id>
+    <content type="html">&lt;p&gt;At PolicyStat, whenever we have written a chunk of code that seems like it might have widespread usefulness, we like to release it as open source. We have recently released HTML Tree Diff, a library for showing diffs between HTML documents in a structure-aware way. It is written in Python, and you can get the source code at &lt;a href=&quot;https://github.com/christian-oudard/htmltreediff&quot; target=&quot;_blank&quot;&gt;GitHub&lt;/a&gt;, or install it from the &lt;a href=&quot;http://pypi.python.org/pypi/html-tree-diff/0.1.0&quot; target=&quot;_blank&quot;&gt;Python Package Index&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We work with HTML documents every day, and we were disappointed that there was not an existing library to display &quot;track-changes&quot; style diffs between HTML documents. This code has been used in production since June 2009, and we're excited to share it with the community.&lt;/p&gt;
+&lt;h2&gt;Documents&lt;/h2&gt;
+&lt;p&gt;Let's say you have a document. &amp;nbsp;&lt;em&gt;Very Important Document&lt;/em&gt;&lt;sup&gt;tm&lt;/sup&gt;. And some &lt;em&gt;Very Important People&lt;/em&gt; are interested in what's in the document. Now, as very important as these people are, they don't have the time to read through the entire thing each time it gets updated, but they would like to know what exactly the changes are. That's where diff comes in.&lt;/p&gt;
+&lt;p&gt;Let me show you an example:&lt;/p&gt;
+&lt;table&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Old&lt;/td&gt;
+            &lt;td&gt;New&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/old_document.png&quot; alt=&quot;old document&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/new_document.png&quot; alt=&quot;new document&quot; /&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Someone has changed the jelly donut schedule! It's been the same for years! How will we remember the new one? Everybody panic!&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/panic.gif&quot; alt=&quot;PANIC&quot; /&gt;&lt;/p&gt;
+&lt;h2&gt;Diffs&lt;/h2&gt;
+&lt;p&gt;But wait, through the clever use of technology, you can calm the panic by showing them exactly what changed between the two documents:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/inline_diff.png&quot; alt=&quot;inline diff&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;As you may know, this is a &lt;a href=&quot;http://en.wikipedia.org/wiki/Diff&quot; target=&quot;_blank&quot;&gt;diff&lt;/a&gt;. It concisely shows what lines have changed between the successive versions. We can even fancy it up and use html styling to make it more readable:&lt;/p&gt;
+&lt;table&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Source&lt;/td&gt;
+            &lt;td&gt;Rendered&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/source_doc.png&quot; alt=&quot;source doc&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/rendered_doc.png&quot; alt=&quot;rendered doc&quot; /&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2&gt;HTML Documents&lt;/h2&gt;
+&lt;p&gt;This works pretty well for files that are just flat text, but what if our &lt;em&gt;Very Important Document&lt;/em&gt; is in HTML format? It turns out that PolicyStat has exactly this situation. We have tens of thousands of &lt;em&gt;Very Important Documents&lt;/em&gt; that are stored in HTML format, and have multiple versions.&lt;/p&gt;
+&lt;p&gt;So let's look at what happens when we try the same thing on an HTML document:&lt;/p&gt;
+&lt;table&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Source&lt;/td&gt;
+            &lt;td&gt;Rendered&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/source_html.png&quot; alt=&quot;source html&quot; /&gt;&lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/rendered_html.png&quot; alt=&quot;rendered html&quot; /&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Disaster! That's not even valid HTML! The &lt;em&gt;Very Important People&lt;/em&gt; are now &lt;em&gt;Very Angry&lt;/em&gt;!&lt;/p&gt;
+&lt;h2&gt;HTML Diffs&lt;/h2&gt;
+&lt;p&gt;What do we do about this? It turns out that this is not a trivial problem to solve. You have to consider that HTML is not flat like a text file, but actually a tree structure.&lt;/p&gt;
+&lt;p&gt;So, to create a diff between two HTML documents, the diff algorithm needs to be aware of the tree structure. There has been some &lt;a href=&quot;http://www.google.com/search?sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;q=tree+edit+distance&quot; target=&quot;_blank&quot;&gt;research&lt;/a&gt;&amp;nbsp;in this area, but none of it that we found was implemented in a practical way, with real-world usefulness.&lt;/p&gt;
+&lt;p&gt;To solve this, I wrote a library that does structure aware diffs of HTML trees. Here's some example output:&lt;/p&gt;
+&lt;table&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Source&lt;/td&gt;
+            &lt;td&gt;Rendered&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;
+                &lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/structure_aware_diff_html.png&quot; alt=&quot;structure-aware diff HTML&quot; /&gt;
+            &lt;/td&gt;
+            &lt;td style=&quot;vertical-align: top;&quot;&gt;
+                &lt;img src=&quot;http://devblog.policystat.com/images/posts/structure-aware-change-tracking/structure_aware_diff_rendered.png&quot; alt=&quot;sturcture-aware diff rendered&quot; /&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The day is saved! Everyone shows up on time for jelly donuts, and the donut rebellion of 2011 is quelled!&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Pingdom and Intermittent Timeouts with mod_wsgi</title>
+    <link href="http://devblog.policystat.comintermittent-timeouts-with-modwsgi"/>
+    <updated>2010-12-17T15:07:00-05:00</updated>
+    <id>http://devblog.policystat.com./pingdom-and-intermittent-timeouts-with-mod_wsgi</id>
+    <content type="html">&lt;h2&gt;Server Errors, but Only Sometimes&lt;/h2&gt;
+&lt;p&gt;We've been getting occasional reports from our users and staff that on rare occasions, a page doesn't load. Of course, the descriptions varied from &quot;server error&quot; to &quot;error page&quot; to &quot;page timeout&quot; to &quot;page hanging&quot; but that's the nature of verbal communication. English is hard, but debugging intermittent errors is probably harder. Luckily, we use &lt;a href=&quot;http://pingdom.com/&quot;&gt;Pingdom&lt;/a&gt; to monitor our site and keep us informed of any problems, so we do have some data to refer to every time I hear of anyone having trouble. We run a check every minute against our login page to make sure that the welcome message and login form displays (among other checks). It's been easy to just refer to that and be assured that we've actually had 100% uptime.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/intermittent-timeouts-with-modwsgi/uptime.png&quot; alt=&quot;Pingdom Uptime&quot; /&gt;&lt;/p&gt;
+&lt;h2&gt;100% Is Only Sorta 100%&lt;/h2&gt;
+&lt;p&gt;Looking back through the data again, I got a little bit suspicious. 100% seems too good to be true over 43,200 checks across the public internet, as you'd expect some packet somewhere to get dropped. After digging down to the detailed Pingdom report, I found out that Pingdom checks have another status beyond just &quot;UP&quot; or &quot;DOWN.&quot; If a check fails, another check follows it immediately to confirm, and the first failed check shows up in the detailed logs as &quot;DOWN_UNCONFIRMED.&quot; I comb through the logs and see that of the 43,200 checks in the last month, 47 of them have resulted in &quot;DOWN_UNCONFIRMED&quot; which is a bit more than 1 out of every 1000.&lt;/p&gt;
+&lt;h2&gt;mod_wsgi, I'm Doing It Wrong&lt;/h2&gt;
+&lt;p&gt;After combing through the various Nginx and Apache logs between all of our application servers, I find a rough pattern where around the time of a DOWN_UNCONFIRMED check I see one or more apache messages like this:&lt;/p&gt;
+&lt;pre&gt;[Tue Dec 14 12:11:04 2010] [error] [client xxx.xxx.xxx.xxx] Premature end of script headers: deploy.wsgi
+&lt;/pre&gt;
+&lt;p&gt;Ah ha!&lt;/p&gt;
+&lt;p&gt;We use django running on mod_wsgi inside Apache2 reverse proxied via Nginx and deploy.wsgi is our Django wsgi file. Google helps me find a lot of different causes of the &quot;Premature end of script headers&quot; error message and I eliminate several of them. Finally I locate a post by the eminantly-helpful &lt;a href=&quot;http://blog.dscpl.com.au/&quot;&gt;Graham Dumpleton&lt;/a&gt;&amp;nbsp;on the &lt;a href=&quot;http://groups.google.com/group/modwsgi/msg/480ea05b6e78f62e&quot;&gt;mod_wsgi google group&lt;/a&gt;&amp;nbsp;where he mentions that whenever a &lt;code&gt;WSGIDaemonProcess&lt;/code&gt;hits the &lt;code&gt;maximum-requests&lt;/code&gt; limit, mod_wsgi will actually kill any requests currently being processed if they don't finish within 5 seconds. Our intermittent hangs instantly made sense because we had a relatively aggressive maximum-requests value of 500 (a reminant of formerly running mysql, memcached and apache2/modwsgi all on the same server).&lt;/p&gt;
+&lt;p&gt;That meant that once every 500 requests, any users loading slow pages (reports, uploads, complex searches, etc) would get their request chopped off. It also explained why the failures were mostly clustered around our prime usage times because not only are page loads slightly slower when we're under load, but the wsgi daemon processes will be getting more requests and thus restarting more frequently.&lt;/p&gt;
+&lt;h2&gt;Django + Apache2/mod_wsgi + Nginx Are Not Magic&lt;/h2&gt;
+&lt;p&gt;I'm a huge fan of mod_wsgi and how easy it is to administrate, but this just goes to show that even subtle configuration decisions can have an impact. Graham Dumpleton can't read my mind, unfortunately.&lt;/p&gt;
+&lt;p&gt;Our solution was to increase the maximum-requests value to 10k. This should cut down the number of dropped requests by 20x. We've got quite a bit of extra RAM, so this seems like an easy fix.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/intermittent-timeouts-with-modwsgi/munin.png&quot; alt=&quot;munin memory usage&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;We'll also be monitoring memory usage using &lt;a href=&quot;http://munin-monitoring.org/&quot;&gt;Munin&lt;/a&gt;&amp;nbsp;and if it appears that memory leaks are not actually a problem for our application, we'll consider upping the maximum-requests value even further. Perhaps we can even eliminate maximum-requests entirely in favor of using our normal alerting and monitoring system to notify us in case mod_wsgi memory usage hits an unacceptable threshold.&lt;/p&gt;
+&lt;p&gt;It seems that maybe the mod_wsgi documentation could benefit from a quick blurb about this side-effect of maximum-requests, so I opened a &lt;a href=&quot;http://code.google.com/p/modwsgi/issues/detail?id=218&quot;&gt;mod_wsgi issue&lt;/a&gt; for a documentation enhancement.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>PHP to Django: Changing the engine while the car is running</title>
+    <link href="http://devblog.policystat.comphp-to-django-changing-the-engine-while-the-c"/>
+    <updated>2010-11-15T15:07:00-05:00</updated>
+    <id>http://devblog.policystat.com./php-to-django</id>
+    <content type="html">&lt;p&gt;It's pretty widely known that web frameworks like
+&lt;a href=&quot;http://djangoproject.com&quot;&gt;Django&lt;/a&gt; and &lt;a href=&quot;http://rubyonrails.org&quot;&gt;Ruby on Rails&lt;/a&gt;
+are amazing. They give developers the ability to build applications quickly and
+reliably and there's all sorts of hotness when it comes to tools and community
+and reusable applications. But what if &lt;em&gt;your&lt;/em&gt; application isn't using a web
+framework? Are you doomed to be outmaneuvered by your competitors?&lt;/p&gt;
+
+&lt;h2&gt;It Takes a Choice&lt;/h2&gt;
+
+&lt;p&gt;PolicyStat, like most ideas, was born out of a prototype. In our case, the
+prototype was written in PHP with the kind of architecture you'd expect from a
+prototype. There were 45 .php files in a folder with one file called
+class.main.php. No templates. No classes. No consistent database access. No
+MVC. No ORM. No tests.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/php-to-django/first_commit.png.scaled500.png&quot; alt=&quot;First Commit&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Once our prototype took off and we realized there was a strong market for
+policy management software done exactly the way we wanted to do it, we had a
+decision to make. Should we focus on improving our existing code base? Port
+things to one of the PHP web frameworks? Switch languages all together? As
+someone who believes the &lt;a href=&quot;http://www.joelonsoftware.com/articles/fog0000000069.html&quot;&gt;Single Worst Mistake&lt;/a&gt;
+a software company can make is rewriting from scratch, it was still
+obvious that moving to Django was in the best interest of our company (and my
+sanity). We decided to have our cake and eat it too.&lt;/p&gt;
+
+&lt;h2&gt;Integration Version 1&lt;/h2&gt;
+
+&lt;p&gt;After a lot of hard thinking, we realized that if we could somehow get a Django
+project to share sessions with our existing PHP prototype, we could keep both
+codebases active at the same time while we slowly ported functionality from PHP
+over to Django. Our integration process went something like this:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Create models.py files and break them up by functionality in to separate apps
+using Django's great &lt;a href=&quot;http://docs.djangoproject.com/en/1.2/howto/legacy-databases/&quot;&gt;legacy database&lt;/a&gt;
+support.&lt;/li&gt;
+&lt;li&gt;Build a &lt;a href=&quot;http://docs.djangoproject.com/en/dev/topics/http/sessions/#configuring-the-session-engine&quot;&gt;Django Session Engine&lt;/a&gt;
+using &lt;a href=&quot;http://pypi.python.org/pypi/phpserialize&quot;&gt;phpserialize&lt;/a&gt; to speak PHP's
+serialization format.&lt;/li&gt;
+&lt;li&gt;Duplicate the HTML templates spread out in various .php includes to Django's
+superior &lt;a href=&quot;http://docs.djangoproject.com/en/dev/topics/templates/#template-inheritance&quot;&gt;Template Inheritance&lt;/a&gt;
+system.&lt;/li&gt;
+&lt;li&gt;Separate PHP and Django based on URL paths via the Apache configuration
+(mod_php and mod_python at the time).&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;In the end, it only took a couple of weeks to get to a very basic level of
+integration. A vast majority of PolicyStat was still in PHP, but a couple of
+pages were served from Django. The key was that this change was seamless from a
+user's perspective. We didn't even need to explain to customers that anything
+was changing, because it didn't matter from their end. We were able to continue
+delivering normal enhancements and bug fixes while doing the initial
+integration.&lt;/p&gt;
+
+&lt;h2&gt;Toward 100% Django&lt;/h2&gt;
+
+&lt;p&gt;Once you get the bare minimum level of integration, the hard, non-technical
+problem to solve is what you should do from there. On one end, you can shut
+down feature development and bug fixes for a few months while you attempt to
+port the remaining PHP portions bit by bit. On the other end, you can choose to
+be a dual-backend application forever and ever, amen.&lt;/p&gt;
+
+&lt;p&gt;We took the position that the PHP portions of our application were just pieces
+of code that needed refactoring. Once we made that decision our process
+naturally fell out; we already knew how to handle less-than-perfect code. When
+we added new features, they were done in Python and Django. When we needed to
+polish or otherwise fix functionality that lived in PHP, we looked at it just
+like you'd look at that super-ugly method you wrote a couple of years ago when
+you were in a hurry. If it was a very small change, we tended to just make the
+change in PHP. If it was a decent chunk of change, or the change would be
+easier in python, we first wrote unit tests on what we expected the behavior to
+be using the existing code as a guide, then we ported the code to Django and
+made the fix. During that time, we continued to deliver regular product
+updates.&lt;/p&gt;
+
+&lt;h2&gt;22 Months Later&lt;/h2&gt;
+
+&lt;p&gt;So finally, after 22 months of regular updates and massive product improvements
+(including a major architectural revampt to support multi-tenancy), we finally
+removed the last bit of PHP. It was a very, very, very happy day for the
+development team. To our customers though, it was just another update. That's a
+good thing :)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/php-to-django/last_php.png&quot; alt=&quot;last php removal&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Notes&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Django and Ruby on Rails are the best examples, but there are plenty of
+other great frameworks. The major decision is between using a solid web
+framework and not using one.&lt;/li&gt;
+&lt;li&gt;Yes there are reasons not to move your app to a web framework, but if
+you're basing your business around an application, there aren't many
+situations where your organization wouldn't stand to benefit.&lt;/li&gt;
+&lt;li&gt;If anyone is interested, I'd be happy to do a followup post with a more
+technical look at the django session engine we used and maybe what our
+apache vhost file looked like.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Edit: Finally finished the follow-up post with technical details on &lt;a href=&quot;http://devblog.policystat.com/php-to-django-how-we-did-it&quot;&gt;migrating
+from php to django&lt;/a&gt;.&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>Network latency between ec2 instances: public vs private IP and same vs different availability zone</title>
+    <link href="http://devblog.policystat.comnetwork-latency-between-ec2-instances-public"/>
+    <updated>2010-11-09T15:07:00-05:00</updated>
+    <id>http://devblog.policystat.com./network-latency-between-ec2-instances</id>
+    <content type="html">&lt;h2&gt;How Realistic is Your ec2 =&amp;gt; ec2 Load Test?&lt;/h2&gt;
+&lt;p&gt;Today I was reading about a cool distributed load-testing tool called &lt;a href=&quot;http://blog.apps.chicagotribune.com/2010/07/08/bees-with-machine-guns/&quot;&gt;Bees With Machine Guns&lt;/a&gt;&amp;nbsp;(awesome name) and a commenter asked how testing ec2 to ec2 might affect the load test. After all, real clients aren't going to have local network connection speeds to your application, which is going to change the characteristics of how your application responds. With slow clients you get increased resource usage depending on your setup and you'd probably like to know whether or not putting that reverse proxy in front of your application server actually helps.&lt;/p&gt;
+&lt;p&gt;I was going to suggest in the comments that using a different availability zone would actually solve the problem, but then I realized I was just guessing. So I ran some simple, unscientific tests.&lt;/p&gt;
+&lt;h2&gt;Results Summary&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&quot;http://chart.apis.google.com/chart?cht=bhs&amp;amp;chs=450x130&amp;amp;chd=t:.5,2,81.7&amp;amp;chtt=EC2%20Network%20Latency%20(ms)&amp;amp;chco=4D89F9&amp;amp;chxt=x,y&amp;amp;chxl=1:|Different%20Region|Different%20AZ|Same%20AZ&quot; alt=&quot;EC2 Network Latency Graph&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;In a nutshell, if you want mostly-realistic ec2=&amp;gt;ec2 load tests, put your load testing instances in another region. As you would suspect, using the internal vs external DNS entry doesn't matter (except for your bill) and moving to another availability zone still gives you super quick connection speed. While moving your tests to another region won't give you the variance you need for realistic tests (there are tools for this, though), it is a dead-simple way to get a more-realistic picture of what your application does under load.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;The average response times I received:&lt;/p&gt;
+&lt;ul&gt;
+    &lt;li&gt;00.5 ms- Same Region, Same Availability Zone&lt;/li&gt;
+    &lt;li&gt;02.0 ms- Same Region, Different Availability Zone&lt;/li&gt;
+    &lt;li&gt;81.7 ms- Different Region&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Test Methodology&lt;/h2&gt;
+&lt;p&gt;I spun up 4 instances with 32-bit ubuntu 10.04-based images and ran pings between them using both the public and the private DNS entry. I ran a couple of pings to start to take care of caching the DNS lookup and then I ran:&lt;/p&gt;
+&lt;pre&gt;$ ping address.to.ping -c 20&lt;/pre&gt;
+&lt;p&gt;Instances:&lt;/p&gt;
+&lt;ul&gt;
+    &lt;li&gt;instance.a: high-cpu medium in us-east-&lt;strong&gt;1b&lt;/strong&gt;&lt;/li&gt;
+    &lt;li&gt;instance.b: high-cpu medium in us-east-&lt;strong&gt;1b&lt;/strong&gt;&lt;/li&gt;
+    &lt;li&gt;instance.c: high-cpu medium in us-east-&lt;strong&gt;1d&lt;/strong&gt;&lt;/li&gt;
+    &lt;li&gt;instance.d: high-cpu medium in us-west-&lt;strong&gt;1a&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Detailed Results&lt;/h3&gt;
+&lt;h4&gt;Same Region, Same Availability Zone&lt;/h4&gt;
+&lt;p&gt;instance.a =&amp;gt; instance.b&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Public DNS&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;--- ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 19087ms
+rtt min/avg/max/mdev = 0.397/0.540/0.629/0.061 ms
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;Private DNS&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;--- ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 19096ms
+rtt min/avg/max/mdev = 0.362/0.544/0.733/0.084 ms&lt;/pre&gt;
+&lt;h4&gt;Same Region, Different Availability Zone&lt;/h4&gt;
+&lt;p&gt;instance.a =&amp;gt; instance.c&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Public DNS&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;--- ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 19187ms
+rtt min/avg/max/mdev = 1.817/2.035/3.113/0.260 ms
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;Private DNS&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;--- ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 19185ms
+rtt min/avg/max/mdev = 1.790/1.936/2.051/0.078 ms
+&lt;/pre&gt;
+&lt;h4&gt;Different Regions&lt;/h4&gt;
+&lt;p&gt;instance.a =&amp;gt; instance.d&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Public DNS&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;--- ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 19176ms
+rtt min/avg/max/mdev = 81.517/81.672/82.059/0.281 ms
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;Private DNS&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Not Available&lt;/p&gt;
+</content>
+  </entry>
+  
+  <entry>
+    <title>DevOps at Our Startup</title>
+    <link href="http://devblog.policystat.com/devops-at-our-startup/"/>
+    <updated>2010-10-14T16:54:00-04:00</updated>
+    <id>http://devblog.policystat.com/devops-at-our-startup</id>
+    <content type="html">&lt;p&gt;The guys at &lt;a href=&quot;http://devopscafe.org/&quot;&gt;DevOps Cafe&lt;/a&gt; have been preaching the
+gospel of sharing in operations, and I've been agreeing as loudly as possible.
+This is my first step towards putting up (instead of shutting up).&lt;/p&gt;
+
+&lt;h2&gt;Startups Need DevOps&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.jedi.be/blog/2010/02/12/what-is-this-devops-thing-anyway/&quot;&gt;DevOps&lt;/a&gt;
+problems don't just exist in tiered organizations with a big wall separating
+the development team from the operations team.  In our case, they exist when
+part of the dev team and the whole ops team share a brain.  Over a few posts,
+I'd like to share what our experience has been in solving these problems,
+including the missteps we've had along the way and the problems we're still
+working on. First though, I'd like to explain why DevOps and a focus on
+Culture, Automation, Metrics and Sharing (&lt;strong&gt;CAMS&lt;/strong&gt;) has worked well for us and
+why I think it's a critical element of success in startups.&lt;/p&gt;
+
+&lt;p&gt;Startups are fundamentally about learning and building in the &lt;a href=&quot;http://www.startuplessonslearned.com/2008/09/lean-startup.html&quot;&gt;face of
+uncertainty&lt;/a&gt;.
+For this and many other reasons, agile development is almost universally seen
+as the way to build a software product (I'm going to take this as a given from
+here on out).  If you're doing software development in a startup, you should be
+using an agile process because the requirements are uncertain.  They're not
+just uncertain because requirements are hard to write down.  They're uncertain
+because not only do you not know what your customer want but you might not even
+know who your customer &lt;em&gt;is&lt;/em&gt;.  Agile development means rapid iteration, and one
+of the first things you run in to is that it's difficult to keep an application
+deployed and operational when you're changing large parts of your application
+on a regular basis (especially early).  Agile development doesn't work with
+slow, rigid operations.&lt;/p&gt;
+
+&lt;h3&gt;Bad Solutions&lt;/h3&gt;
+
+&lt;p&gt;Your startup is chugging along, iterating quickly and deploying lightly-tested
+code to your one server by doing &lt;code&gt;git pull &amp;amp;&amp;amp; touch deploy.wsgi&lt;/code&gt;.  You're
+learning tons as you get rapid feedback from customers and people love you
+because you can push a fix for their bug before you even hang up the phone!.
+Then, one day, you find a HUGE bug in production and How Could This Happen!?
+The next week, your application goes down because you tested that new feature
+using python 2.6 locally and the server has 2.5 and urllib hates you and you
+were going to update the server to 2.6 before the next &lt;code&gt;git pull&lt;/code&gt; but Fred
+deployed his feature first and you remember telling Fred about the python 2.6
+thing and now your co-founder is questioning this rapid iteration thing and
+your customers don't care about your 5-minute turn around on bug fixes because
+they were in a presentation when you went down and... arg.&lt;/p&gt;
+
+&lt;p&gt;The worst reaction is to slow down development.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You can shame/punish developers for any bugs or mistakes&lt;/li&gt;
+&lt;li&gt;You can require every update go through a manual set of several hundred test
+cases that takes a few days to click through&lt;/li&gt;
+&lt;li&gt;You can lengthen your release cycle so that the rapid iterations only happen
+on the internal build and customers only see the changes every couple of
+months after a rigorous manual QA process.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;All of those options work in the sense that you can improve uptime and quality
+over your old way of doing things. The problem is that in the mean time, your
+business suffers.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Punishing errors won't actually solve your problem, but it has the misfortune
+of making shamers feel better. This is a mindset that we've had to constantly
+fight in order to build a culture where it's ok to &lt;a href=&quot;http://www.startuplessonslearned.com/2009/10/curse-of-prevention.html&quot;&gt;make a mistake exactly
+once&lt;/a&gt;.
+Unilateral mistake prevention isn't possible without HUGE costs.&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Days worth of manual tests are the opposite of rapid. Before automating
+testing was a viable alternative, this might have been the only option to
+ensure quality, but every delay lengthens the distance between you and
+learning from your customers. It's also very possible that your time running
+manual tests on known problems cuts in to the time you have for exploratory
+testing to find the actual bugs.&lt;/p&gt;
+
+&lt;p&gt;In the beginning, this was the path we went down until we got smart and began
+investing in a suite of &lt;a href=&quot;http://seleniumhq.org/&quot;&gt;Selenium&lt;/a&gt; tests (in
+conjunction with unit tests) to solve the same problem. Now all our code
+changes require accompanying selenium tests and we don't have the kind of bugs
+that manual tests would have caught. We also run these tests many times per
+day, which means we know on an hourly basis what our quality looks like.
+&lt;img src=&quot;http://devblog.policystat.com/images/posts/devops-at-our-startup/selenium_hudson.png&quot; alt=&quot;hudson_status&quot; /&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;Lengthening your release cycle might seem like a good idea, but if that's all
+you're changing, it's just as likely to cause &lt;em&gt;lower&lt;/em&gt; quality as it is to
+raise quality. Instead of building the minimum set of features and iterating
+on feedback, longer cycles encourage you to build too much and &quot;too much&quot; is
+more difficult to test than Just Enough. See our group collaboration story
+for an example. It's kind of a dead horse, but longer release cycles are more
+waterfall, and waterfall is bad.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;We need to deliver changes to our customers quickly because that's the only way
+we can find out what they actually need and give it to them.&lt;/p&gt;
+
+&lt;h3&gt;A Bad Solution Hurts the Business&lt;/h3&gt;
+
+&lt;p&gt;In 2008, when our update cycle was still in the 6-8 week range (because
+releases were a pain), I built a group collaboration piece to help users give
+feedback on policies in advance of a meeting. It took the full 8 week cycle to
+nail down and get built and tested. We then spent another 6 week cycle refining
+the idea based on direct meetings with customers. I thought it was pretty
+awesome and the major sponsor of the feature seemed happy. Later down the road,
+we integrated &lt;a href=&quot;http://mixpanel.com/&quot;&gt;Mixpanel&lt;/a&gt; to start tracking exactly what
+our customers were using and we got some bad news. Not only was the sponsor
+customer the only one using the group collaboration, they were only using it a
+few times a month (versus hundreds of uses a week for our &quot;core&quot; features) AND
+they were only using a subset of the features we added. If we were keeping
+metrics to track usage, we would have known right away that this feature was
+not the most important. If our devops process was better and we didn't fear
+releases, we could have built the core functionality that they were actually
+interested in instead of spending weeks on parts that were &quot;nice to have.&quot; As
+more of a &lt;a href=&quot;http://steveblank.com/2009/08/31/the-customer-development-manifesto-reasons-for-the-revolution-part-1/&quot;&gt;customer
+development&lt;/a&gt;
+note, a bit more customer interaction would have led us to build us something
+very different. We added lightweight in-line collaboration this year in a
+single 2-week cycle. This would have fulfilled 90% of the original requirements
+and is now utilized about 40% of the available time instead of the low
+single-digit utilization for the larger, more-complicated group collaboration
+feature. Our devops problem cost us ~10 weeks of desperately-valuable
+development time that our business and customers needed.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://devblog.policystat.com/images/posts/devops-at-our-startup/collab_usage.png&quot; alt=&quot;usage
+graph&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Another Solution, Almost as Bad&lt;/h2&gt;
+
+&lt;p&gt;Another bad solution is to realize that you have a deployment/release problem,
+discover that there are good technical solutions and then spend the next year
+completely automating your processes, collecting metrics, and changing behavior
+to build better culture while you shut down the development side of things.
+Obviously, a startup can't survive treading water for months while working on
+&quot;internal&quot; improvements and you wouldn't lay off a development team (or pay
+them to sit) in the meantime. In our case though, there was no line between the
+development team and the operations team. Time spent on operations was time not
+spent on development. This balance has been a continuing struggle for us, but
+the flexibility that gives us to always work on the most important problem has
+been valuable.&lt;/p&gt;
+
+&lt;h2&gt;A Better Way&lt;/h2&gt;
+
+&lt;p&gt;Recognizing that your business has a problem and that there is a solution seems
+like most of the battle, but there's still the problem of how to get from where
+you are to where you want to be. The good thing about DevOps in general, is
+that it's not a set of things you have to do to be &quot;compliant.&quot; It's a process
+that your startup can use starting &lt;strong&gt;today&lt;/strong&gt; to make things a bit better. It
+starts with a culture that treats operations and development as two side of the
+same coin and that values continuous improvement. The manifestations of this
+include things like striving to automate all of your operations activities and
+putting infrastrcture code in the same source control your application lives.
+If you have a problem with a developer using a different version of a library
+than you deployed to production, give that developer the ability and
+responsibility to change your &lt;a href=&quot;http://pip.openplans.org/&quot;&gt;Pip&lt;/a&gt; requirements
+file and review their code change in your source control. Just like
+development's job is to find the highest value/priority thing to work on every
+day, operations should be looking for the place with the most pain and working
+on removing that pain through &lt;a href=&quot;http://docs.fabfile.org/&quot;&gt;automation&lt;/a&gt; so that it
+stays gone.&lt;/p&gt;
+</content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>PolicyStat's Dev Blog: Structure Aware Change Tracking</title>
+  <meta name="author" content="PolicyStat LLC">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="canonical" href="http://devblog.policystat.comstructure-aware-change-tracking"/>
+  <link href="/favicon.png" rel="shortcut icon" />
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://s3.amazonaws.com/ender-js/jeesh.min.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="http://feeds.feedburner.com/policystatdevblog" rel="alternate" title="PolicyStat's Dev Blog" type="application/atom+xml"/>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2228017-6']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+  <!--Fonts from Google's Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body  >
+  <header><hgroup>
+  <h1><a href="/">PolicyStat's Dev Blog</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role=navigation><ul role=subscription data-subscription="rss">
+  <li><a href="http://feeds.feedburner.com/policystatdevblog" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+<form action="http://google.com/search" method="get">
+  <fieldset role="site-search">
+    <input type="hidden" name="q" value="site:devblog.policystat.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+<ul role=main-navigation>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry">
+  
+  <header>
+    
+      <h1 class="entry-title">Structure Aware Change Tracking</h1>
+    
+    
+      <p class="meta">
+
+
+
+
+<time datetime="2011-02-17 15:07:00 -0500" pubdate  updated >Feb 17<span>th</span>, 2011</time>
+
+
+</p>
+    
+  </header>
+
+
+<div class="entry-content"><p>At PolicyStat, whenever we have written a chunk of code that seems like it might have widespread usefulness, we like to release it as open source. We have recently released HTML Tree Diff, a library for showing diffs between HTML documents in a structure-aware way. It is written in Python, and you can get the source code at <a href="https://github.com/christian-oudard/htmltreediff" target="_blank">GitHub</a>, or install it from the <a href="http://pypi.python.org/pypi/html-tree-diff/0.1.0" target="_blank">Python Package Index</a>.</p>
+<p>We work with HTML documents every day, and we were disappointed that there was not an existing library to display &#8220;track-changes&#8221; style diffs between HTML documents. This code has been used in production since June 2009, and we&#8217;re excited to share it with the community.</p>
+<h2>Documents</h2>
+<p>Let&#8217;s say you have a document. &nbsp;<em>Very Important Document</em><sup>tm</sup>. And some <em>Very Important People</em> are interested in what&#8217;s in the document. Now, as very important as these people are, they don&#8217;t have the time to read through the entire thing each time it gets updated, but they would like to know what exactly the changes are. That&#8217;s where diff comes in.</p>
+<p>Let me show you an example:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Old</td>
+            <td>New</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/old_document.png" alt="old document" /></td>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/new_document.png" alt="new document" /></td>
+        </tr>
+    </tbody>
+</table>
+<p>Someone has changed the jelly donut schedule! It&#8217;s been the same for years! How will we remember the new one? Everybody panic!</p>
+<p><img src="/images/posts/structure-aware-change-tracking/panic.gif" alt="PANIC" /></p>
+<h2>Diffs</h2>
+<p>But wait, through the clever use of technology, you can calm the panic by showing them exactly what changed between the two documents:</p>
+<p><img src="/images/posts/structure-aware-change-tracking/inline_diff.png" alt="inline diff" /></p>
+<p>As you may know, this is a <a href="http://en.wikipedia.org/wiki/Diff" target="_blank">diff</a>. It concisely shows what lines have changed between the successive versions. We can even fancy it up and use html styling to make it more readable:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Source</td>
+            <td>Rendered</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/source_doc.png" alt="source doc" /></td>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/rendered_doc.png" alt="rendered doc" /></td>
+        </tr>
+    </tbody>
+</table>
+<h2>HTML Documents</h2>
+<p>This works pretty well for files that are just flat text, but what if our <em>Very Important Document</em> is in HTML format? It turns out that PolicyStat has exactly this situation. We have tens of thousands of <em>Very Important Documents</em> that are stored in HTML format, and have multiple versions.</p>
+<p>So let&#8217;s look at what happens when we try the same thing on an HTML document:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Source</td>
+            <td>Rendered</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/source_html.png" alt="source html" /></td>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/rendered_html.png" alt="rendered html" /></td>
+        </tr>
+    </tbody>
+</table>
+<p>Disaster! That&#8217;s not even valid HTML! The <em>Very Important People</em> are now <em>Very Angry</em>!</p>
+<h2>HTML Diffs</h2>
+<p>What do we do about this? It turns out that this is not a trivial problem to solve. You have to consider that HTML is not flat like a text file, but actually a tree structure.</p>
+<p>So, to create a diff between two HTML documents, the diff algorithm needs to be aware of the tree structure. There has been some <a href="http://www.google.com/search?sourceid=chrome&amp;ie=UTF-8&amp;q=tree+edit+distance" target="_blank">research</a>&nbsp;in this area, but none of it that we found was implemented in a practical way, with real-world usefulness.</p>
+<p>To solve this, I wrote a library that does structure aware diffs of HTML trees. Here&#8217;s some example output:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Source</td>
+            <td>Rendered</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">
+                <img src="/images/posts/structure-aware-change-tracking/structure_aware_diff_html.png" alt="structure-aware diff HTML" />
+            </td>
+            <td style="vertical-align: top;">
+                <img src="/images/posts/structure-aware-change-tracking/structure_aware_diff_rendered.png" alt="sturcture-aware diff rendered" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p>The day is saved! Everyone shows up on time for jelly donuts, and the donut rebellion of 2011 is quelled!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">PolicyStat LLC</span></span>
+
+      
+
+
+
+
+<time datetime="2011-02-17 15:07:00 -0500" pubdate  updated >Feb 17<span>th</span>, 2011</time>
+
+
+
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/HTML/'>HTML</a>, <a class='category' href='/blog/categories/python/'>python</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://devblog.policystat.comstructure-aware-change-tracking" data-via="policystat" data-counturl="http://devblog.policystat.comstructure-aware-change-tracking" >Tweet</a>
+  
+  
+  <g:plusone size="medium"></g:plusone>
+  
+</div>
+
+    
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread"><div id="disqus_thread"></div>
+<script type="text/javascript">
+  var disqus_developer = 0;
+  if (document.domain != "http://devblog.policystat.com") {
+      disqus_developer = 1;
+  }
+
+  var disqus_shortname = 'policystatdevblog';
+  var disqus_identifier = 'http://devblog.policystat.comstructure-aware-change-tracking';
+  var disqus_url = 'http://devblog.policystat.comstructure-aware-change-tracking';
+  //var disqus_developer = 1;
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside role=sidebar>
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="where-are-the-magic-deployment-tools">Where are the magic deployment tools?</a>
+      </li>
+    
+      <li class="post">
+        <a href="run-mysql-from-a-ram-disk-in-ubuntu">Run MySQL From a RAM Disk in Ubuntu Linux</a>
+      </li>
+    
+      <li class="post">
+        <a href="policypad-real-time-collaboration-through-you">PolicyPad: Etherpad + Bring Your Own Editor</a>
+      </li>
+    
+      <li class="post">
+        <a href="todays-amazon-ec2-ebs-outage-in-a-graph">Today&#8217;s Amazon ec2 EBS Outage in a Graph</a>
+      </li>
+    
+      <li class="post">
+        <a href="php-to-django-how-we-did-it">PHP to Django: How we did it</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("policystat", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/policystat" class="twitter-follow-button" data-width="208px" data-show-count="false">Follow @policystat</a>
+  
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer><p>
+  Copyright &copy; 2011 - PolicyStat LLC -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+</body>
+</html>
