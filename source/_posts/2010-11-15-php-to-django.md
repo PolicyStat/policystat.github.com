@@ -3,9 +3,12 @@ layout: post
 title: "PHP to Django: Changing the engine while the car is running"
 date: 2010-11-15 15:07
 permalink: php-to-django-changing-the-engine-while-the-c
+author: Wes Winham
 comments: true
 categories: 
 - django
+- python
+- php
 ---
 
 It's pretty widely known that web frameworks like
