@@ -1,0 +1,31 @@
+---
+layout: post
+title: "Today's Amazon ec2 EBS Outage in a Graph"
+date: 2011-04-21 15:07
+permalink: todays-amazon-ec2-ebs-outage-in-a-graph
+comments: true
+categories:
+- aws
+- devops
+---
+
+<p>
+    <img src="/images/posts/todays-amazon-ec2-ebs-outage/munin.png" alt="munin disk throughput graph ebs" />
+</p>
+<p>You can clearly see the sharp dropoffs in disk throughput as the EBS volume goes in and out of availability. This is a high-cpu medium instance in US East 1b with 1 10GB EBS volume attached.</p>
+<p>Good news though, I learned a new euphemism for "Stuff is Broke": <strong>Increased Latency</strong></p>
+<p>Defaulting on a mortgage:</p>
+<blockquote>
+    <p>We are experiencing increased latency affecting several housing-related financial obligations.</p>
+</blockquote>
+<p>The Vietnam war:</p>
+<blockquote>
+    <p>We are currently investigating increased latency surrounding our police action.</p>
+</blockquote>
+<p>Chernobyl:</p>
+<blockquote>
+    <p>We can confirm the existence of increased latency surrounding the separation of nuclear fallout from the surrounding wildlife.</p>
+</blockquote>
+<p>Joking aside, I feel like this outage illustrates the <strong>upside of the cloud</strong>, contrary to some other accounts I'm reading. From what I can tell, Amazon experienced an outage in 2 of 4 availability zones (with degraded service in the others, presumably) within 1 of 5 regions. Datacenter outages happen, and sometimes they cluster. The alternative scenario where two of your co-location providers or two pieces of critical hardware goes down means you are 100% going to experience downtime.&nbsp;With ec2, moving your entire operations from affected datacenters x and y to unaffected a and b can literally be one command away. We're all practicing infrastructure as code right?</p>
+<p>In our case, we have application servers load-balanced across both 1b and 1d with an RDS multi-az master in 1b. The DB automatically failed over last night, and the load balancer automatically took the degraded 1b instances out of rotation as soon as they stopped responding. Unfortunately, the working application servers had a little trouble switching connections to the new master Database due to DNS caching (which we'll be fixing). The takeaway though, what could have been a 12-hour (and counting) outage was measured in minutes instead because of the tools AWS makes availlable at low cost.</p>
+<p>Of course, I still had a monitoring alert hit my cell at 4am and not sleeping is kind of a bummer, but I'll take <strong>Mean Time to Recover + distributed risk over Mean Time Between Failures + concentrated risk</strong> any day.&nbsp;</p>
