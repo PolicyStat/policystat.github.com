@@ -1,0 +1,27 @@
+---
+layout: post
+title: "PolicyPad: Etherpad + Bring Your Own Editor"
+date: 2011-05-16 15:07
+permalink: policypad-real-time-collaboration-through-you
+comments: true
+categories:
+- policypad
+- wymeditor
+- javascript
+---
+
+<h2>Real-time In-Browser Collaboration</h2>
+<p>Real-time collaborative document editing in a web browser is hard. Google docs can do it, <a href="http://etherpad.org/">EtherPad</a>&nbsp;can do it, but can your app do it? <a href="http://policypad.readthedocs.org/">PolicyPad</a> is a tool allowing you to make it happen using your existing javascript-based editor.&nbsp;Thanks to the dedicated work of a small team of <a href="http://www.rose-hulman.edu/">Rose-Hulman Institute of Technology</a> students (primarily <a href="http://twitter.com/jetheis">Jimmy Theis</a>&nbsp;and <a href="https://github.com/wellsie1116">Kevin Wells</a>), we've put together a <a href="http://policypad.pstattest.com/static/PolicyPad/demos/wymeditor/launcher.html">demo</a> with <a href="https://github.com/PolicyStat/PolicyPad">github'd source</a>&nbsp;demonstrating real-time collaboration using the standards-focused <a href="http://www.wymeditor.org/">WYMeditor</a>&nbsp;(What You Mean editor).&nbsp;</p>
+<p>PolicyPad is a library to help use any existing javascript-based editor in front of EtherPad to add real-time collaboration. This potentially allows your existing application, with all of your custom editor add-ons and integration, to add the goodness of Etherpad without the need to implement a complex server-side solution for diffing, version control, retrieval, etc.&nbsp;</p>
+<h2>PolicyPad Architecture</h2>
+<p><img src="/images/posts/policypad/architecture.png" alt="PolicyPad architecture diagram" /></p>
+<h2>Future</h2>
+<p>Right now, the code is working well with WYMeditor, but we'd really like to add plugins for other editors, such as <a href="http://tinymce.moxiecode.com/">TinyMCE</a>&nbsp;and <a href="http://ckeditor.com/">CKEditor</a>. We'd also like to fill the existing gaps where the default Etherpad editor provides functionality that we don't yet mimick (real-time chat, stepping back through old versions, import/export).</p>
+<h2>Get Involved:</h2>
+<ul>
+    <li><a href="https://github.com/PolicyStat/PolicyPad">Github Project</a> (pull requests welcome)</li>
+    <li><a href="https://github.com/PolicyStat/PolicyPad/issues">Issue Tracker</a></li>
+    <li><a href="http://groups.google.com/group/policypad">Google Group</a></li>
+    <li><a href="https://convore.com/policypad/">Convore Group</a> (chatroom)</li>
+    <li><a href="http://policypad.pstattest.com/static/PolicyPad/demos/wymeditor/launcher.html">Demo Using WYMeditor</a></li>
+</ul>
