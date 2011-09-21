@@ -3,6 +3,7 @@ layout: post
 title: "Using Vim as Your Git Mergetool"
 date: 2011-09-21 14:53
 comments: true
+author: Wes Winham
 categories: 
 - git
 - vim
