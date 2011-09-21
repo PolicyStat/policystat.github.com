@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>PolicyStat's Dev Blog: PolicyPad: Etherpad + Bring Your Own Editor</title>
+  <title>PolicyStat's Dev Blog: Using Vim as Your Git Mergetool</title>
   <meta name="author" content="PolicyStat LLC">
   
 
@@ -16,7 +16,7 @@
 
   
 
-  <link rel="canonical" href="http://devblog.policystat.com/policypad-real-time-collaboration-through-you"/>
+  <link rel="canonical" href="http://devblog.policystat.com//blog/using-vim-as-your-git-mergetool/"/>
   <link href="/favicon.ico" rel="shortcut icon" />
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -97,7 +97,7 @@
   
   <header>
     
-      <h1 class="entry-title">PolicyPad: Etherpad + Bring Your Own Editor</h1>
+      <h1 class="entry-title">Using Vim as Your Git Mergetool</h1>
     
     
       <p class="meta">
@@ -105,7 +105,7 @@
 
 
 
-<time datetime="2011-05-16 15:07:00 -0400" pubdate  updated >May 16<span>th</span>, 2011</time>
+<time datetime="2011-09-21 14:53:00 -0400" pubdate  updated >Sep 21<span>st</span>, 2011</time>
 
 
 </p>
@@ -113,21 +113,75 @@
   </header>
 
 
-<div class="entry-content"><h2>Real-time In-Browser Collaboration</h2>
-<p>Real-time collaborative document editing in a web browser is hard. Google docs can do it, <a href="http://etherpad.org/">EtherPad</a>&nbsp;can do it, but can your app do it? <a href="http://policypad.readthedocs.org/">PolicyPad</a> is a tool allowing you to make it happen using your existing javascript-based editor.&nbsp;Thanks to the dedicated work of a small team of <a href="http://www.rose-hulman.edu/">Rose-Hulman Institute of Technology</a> students (primarily <a href="http://twitter.com/jetheis">Jimmy Theis</a>&nbsp;and <a href="https://github.com/wellsie1116">Kevin Wells</a>), we&#8217;ve put together a <a href="http://policypad.pstattest.com/static/PolicyPad/demos/wymeditor/launcher.html">demo</a> with <a href="https://github.com/PolicyStat/PolicyPad">github&#8217;d source</a>&nbsp;demonstrating real-time collaboration using the standards-focused <a href="http://www.wymeditor.org/">WYMeditor</a>&nbsp;(What You Mean editor).&nbsp;</p>
-<p>PolicyPad is a library to help use any existing javascript-based editor in front of EtherPad to add real-time collaboration. This potentially allows your existing application, with all of your custom editor add-ons and integration, to add the goodness of Etherpad without the need to implement a complex server-side solution for diffing, version control, retrieval, etc.&nbsp;</p>
-<h2>PolicyPad Architecture</h2>
-<p><img src="/images/posts/policypad/architecture.png" alt="PolicyPad architecture diagram" /></p>
-<h2>Future</h2>
-<p>Right now, the code is working well with WYMeditor, but we&#8217;d really like to add plugins for other editors, such as <a href="http://tinymce.moxiecode.com/">TinyMCE</a>&nbsp;and <a href="http://ckeditor.com/">CKEditor</a>. We&#8217;d also like to fill the existing gaps where the default Etherpad editor provides functionality that we don&#8217;t yet mimick (real-time chat, stepping back through old versions, import/export).</p>
-<h2>Get Involved:</h2>
-<ul>
-    <li><a href="https://github.com/PolicyStat/PolicyPad">Github Project</a> (pull requests welcome)</li>
-    <li><a href="https://github.com/PolicyStat/PolicyPad/issues">Issue Tracker</a></li>
-    <li><a href="http://groups.google.com/group/policypad">Google Group</a></li>
-    <li><a href="https://convore.com/policypad/">Convore Group</a> (chatroom)</li>
-    <li><a href="http://policypad.pstattest.com/static/PolicyPad/demos/wymeditor/launcher.html">Demo Using WYMeditor</a></li>
-</ul>
+<div class="entry-content"><p>Resolving merge conflicts has always been a pain point for our team and it&#8217;s
+mostly been a tooling problem.</p>
+
+<h2>Not-good-enough Solutions</h2>
+
+<p>Until now, we&#8217;ve been stuck making tradeoffs between good 3-way diff tools and
+good code editors.</p>
+
+<p>On one side, tools like <a href="http://meld.sourceforge.net/">Meld</a> are great at
+showing you the differences, and helping you resolve your text conflict. You
+lose all your nice editing shortcuts and syntax highlighting though, and you&#8217;re
+dropping out of your normal vim-based workflow.</p>
+
+<p>On the other side, you can use vim or vimdiff, but vim isn&#8217;t a merge tool and
+vimdiff feels clunky for the 3-way merges that git gives you.</p>
+
+<h2>Inspiration: fugitive.vim and git mergetool</h2>
+
+<p>Today, I read a post by <a href="http://twitter.com/closedbracket">Flaviu Simihaian</a>
+explaining how to <a href="http://readncode.com/blog/how-to-do-a-git-merge-with-vim/">resolve git merge conflicts with
+Vim</a>. Eureka! You
+get to stay in your familar editor while keeping all of the niceties of a 3-way
+diff!</p>
+
+<h2>A little nicer via git mergetool</h2>
+
+<p>I have one more step to add to make the normal workflow a little easier. Git
+actually gives you the ability to define arbitary merge tool command for use
+when resolving merge conflicts, so let&#8217;s use that plus the power of vim to
+change your merge work flow to a simple</p>
+
+<pre><code>$ git merge
+$ git mergetool
+</code></pre>
+
+<h3>Configuring mergetool</h3>
+
+<p>We&#8217;re goingto use the magic of
+<a href="http://vimdoc.sourceforge.net/htmldoc/starting.html">VIM startup commands</a> combined with
+<a href="http://www.kernel.org/pub/software/scm/git/docs/v1.6.4.5/git-mergetool.html">git-mergetool</a>
+to automate loading the appropriate diffs inside vim with fugitive.vim&#8217;s 3-way
+merging awesomeness.</p>
+
+<h4>Install fugitive.vim</h4>
+
+<p>The <a href="https://github.com/tpope/vim-fugitive">fugitive.vim plugin</a> gives you
+access to git commands and information from inside vim. It has the handy
+ability to do a 3-way git-style diff.</p>
+
+<p>Assuming you have <a href="https://github.com/tpope/vim-pathogen">pathogen.vim</a>
+installed (you should), just run:</p>
+
+<pre><code>$ cd ~/.vim/bundle
+$ git clone git://github.com/tpope/vim-fugitive.git
+</code></pre>
+
+<h4>Configure gvim as your mergetool.</h4>
+
+<pre><code>$ git config merge.tool gvim
+$ git config mergetool.gvim.cmd 'gvim "+Gdiff" $MERGED'
+</code></pre>
+
+<h2>Usage</h2>
+
+<p><a href="http://readncode.com/blog/how-to-do-a-git-merge-with-vim/">Flaviu&#8217;s post</a> has
+great instructions on usage, but the gist is to use <code>]c</code> to navigate to
+conflicts and then <code>:diffget //2</code> or <code>:diffget //3</code> to choose the version to
+keep. <code>:diffupdate</code> fixes your whitespace issues and then <code>:only</code> lets you see
+what you&#8217;ve changed before you save.</p>
 </div>
 
 
@@ -136,14 +190,14 @@
       
   
 
-<span class="byline author vcard">Posted by <span class="fn">Wes Winham</span></span>
+<span class="byline author vcard">Posted by <span class="fn">PolicyStat LLC</span></span>
 
       
 
 
 
 
-<time datetime="2011-05-16 15:07:00 -0400" pubdate  updated >May 16<span>th</span>, 2011</time>
+<time datetime="2011-09-21 14:53:00 -0400" pubdate  updated >Sep 21<span>st</span>, 2011</time>
 
 
 
@@ -151,7 +205,7 @@
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/javascript/'>javascript</a>, <a class='category' href='/blog/categories/policypad/'>policypad</a>, <a class='category' href='/blog/categories/wymeditor/'>wymeditor</a>
+    <a class='category' href='/blog/categories/git/'>git</a>, <a class='category' href='/blog/categories/vim/'>vim</a>
   
 </span>
 
@@ -160,7 +214,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://devblog.policystat.com/policypad-real-time-collaboration-through-you" data-via="policystat" data-counturl="http://devblog.policystat.com/policypad-real-time-collaboration-through-you" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://devblog.policystat.com//blog/using-vim-as-your-git-mergetool/" data-via="policystat" data-counturl="http://devblog.policystat.com//blog/using-vim-as-your-git-mergetool/" >Tweet</a>
   
   
   <g:plusone size="medium"></g:plusone>
@@ -181,8 +235,8 @@
   }
 
   var disqus_shortname = 'policystatdevblog';
-  var disqus_identifier = 'http://devblog.policystat.com/policypad-real-time-collaboration-through-you';
-  var disqus_url = 'http://devblog.policystat.com/policypad-real-time-collaboration-through-you';
+  var disqus_identifier = 'http://devblog.policystat.com//blog/using-vim-as-your-git-mergetool/';
+  var disqus_url = 'http://devblog.policystat.com//blog/using-vim-as-your-git-mergetool/';
   //var disqus_developer = 1;
   (function() {
     var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

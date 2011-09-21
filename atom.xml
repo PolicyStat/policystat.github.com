@@ -4,13 +4,90 @@
   <title>PolicyStat's Dev Blog</title>
   <link href="http://devblog.policystat.com//atom.xml" rel="self"/>
   <link href="http://devblog.policystat.com//"/>
-  <updated>2011-09-12T15:21:03-04:00</updated>
+  <updated>2011-09-21T15:29:43-04:00</updated>
   <id>http://devblog.policystat.com//</id>
   <author>
     <name>PolicyStat LLC</name>
     
   </author>
 
+  
+  <entry>
+    <title>Using Vim as Your Git Mergetool</title>
+    <link href="http://devblog.policystat.com//blog/using-vim-as-your-git-mergetool/"/>
+    <updated>2011-09-21T14:53:00-04:00</updated>
+    <id>http://devblog.policystat.com//blog/using-vim-as-your-git-mergetool</id>
+    <content type="html">&lt;p&gt;Resolving merge conflicts has always been a pain point for our team and it's
+mostly been a tooling problem.&lt;/p&gt;
+
+&lt;h2&gt;Not-good-enough Solutions&lt;/h2&gt;
+
+&lt;p&gt;Until now, we've been stuck making tradeoffs between good 3-way diff tools and
+good code editors.&lt;/p&gt;
+
+&lt;p&gt;On one side, tools like &lt;a href=&quot;http://meld.sourceforge.net/&quot;&gt;Meld&lt;/a&gt; are great at
+showing you the differences, and helping you resolve your text conflict. You
+lose all your nice editing shortcuts and syntax highlighting though, and you're
+dropping out of your normal vim-based workflow.&lt;/p&gt;
+
+&lt;p&gt;On the other side, you can use vim or vimdiff, but vim isn't a merge tool and
+vimdiff feels clunky for the 3-way merges that git gives you.&lt;/p&gt;
+
+&lt;h2&gt;Inspiration: fugitive.vim and git mergetool&lt;/h2&gt;
+
+&lt;p&gt;Today, I read a post by &lt;a href=&quot;http://twitter.com/closedbracket&quot;&gt;Flaviu Simihaian&lt;/a&gt;
+explaining how to &lt;a href=&quot;http://readncode.com/blog/how-to-do-a-git-merge-with-vim/&quot;&gt;resolve git merge conflicts with
+Vim&lt;/a&gt;. Eureka! You
+get to stay in your familar editor while keeping all of the niceties of a 3-way
+diff!&lt;/p&gt;
+
+&lt;h2&gt;A little nicer via git mergetool&lt;/h2&gt;
+
+&lt;p&gt;I have one more step to add to make the normal workflow a little easier. Git
+actually gives you the ability to define arbitary merge tool command for use
+when resolving merge conflicts, so let's use that plus the power of vim to
+change your merge work flow to a simple&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ git merge
+$ git mergetool
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Configuring mergetool&lt;/h3&gt;
+
+&lt;p&gt;We're goingto use the magic of
+&lt;a href=&quot;http://vimdoc.sourceforge.net/htmldoc/starting.html&quot;&gt;VIM startup commands&lt;/a&gt; combined with
+&lt;a href=&quot;http://www.kernel.org/pub/software/scm/git/docs/v1.6.4.5/git-mergetool.html&quot;&gt;git-mergetool&lt;/a&gt;
+to automate loading the appropriate diffs inside vim with fugitive.vim's 3-way
+merging awesomeness.&lt;/p&gt;
+
+&lt;h4&gt;Install fugitive.vim&lt;/h4&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://github.com/tpope/vim-fugitive&quot;&gt;fugitive.vim plugin&lt;/a&gt; gives you
+access to git commands and information from inside vim. It has the handy
+ability to do a 3-way git-style diff.&lt;/p&gt;
+
+&lt;p&gt;Assuming you have &lt;a href=&quot;https://github.com/tpope/vim-pathogen&quot;&gt;pathogen.vim&lt;/a&gt;
+installed (you should), just run:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ cd ~/.vim/bundle
+$ git clone git://github.com/tpope/vim-fugitive.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4&gt;Configure gvim as your mergetool.&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;$ git config merge.tool gvim
+$ git config mergetool.gvim.cmd 'gvim &quot;+Gdiff&quot; $MERGED'
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Usage&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://readncode.com/blog/how-to-do-a-git-merge-with-vim/&quot;&gt;Flaviu's post&lt;/a&gt; has
+great instructions on usage, but the gist is to use &lt;code&gt;]c&lt;/code&gt; to navigate to
+conflicts and then &lt;code&gt;:diffget //2&lt;/code&gt; or &lt;code&gt;:diffget //3&lt;/code&gt; to choose the version to
+keep. &lt;code&gt;:diffupdate&lt;/code&gt; fixes your whitespace issues and then &lt;code&gt;:only&lt;/code&gt; lets you see
+what you've changed before you save.&lt;/p&gt;
+</content>
+  </entry>
   
   <entry>
     <title>Where are the magic deployment tools?</title>

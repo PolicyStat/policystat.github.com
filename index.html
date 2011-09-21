@@ -100,6 +100,103 @@
     
   <header>
     
+      <h1 class="entry-title"><a href="/blog/using-vim-as-your-git-mergetool/">Using Vim as Your Git Mergetool</a></h1>
+    
+    
+      <p class="meta">
+
+
+
+
+<time datetime="2011-09-21 14:53:00 -0400" pubdate  updated >Sep 21<span>st</span>, 2011</time>
+
+
+</p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Resolving merge conflicts has always been a pain point for our team and it&#8217;s
+mostly been a tooling problem.</p>
+
+<h2>Not-good-enough Solutions</h2>
+
+<p>Until now, we&#8217;ve been stuck making tradeoffs between good 3-way diff tools and
+good code editors.</p>
+
+<p>On one side, tools like <a href="http://meld.sourceforge.net/">Meld</a> are great at
+showing you the differences, and helping you resolve your text conflict. You
+lose all your nice editing shortcuts and syntax highlighting though, and you&#8217;re
+dropping out of your normal vim-based workflow.</p>
+
+<p>On the other side, you can use vim or vimdiff, but vim isn&#8217;t a merge tool and
+vimdiff feels clunky for the 3-way merges that git gives you.</p>
+
+<h2>Inspiration: fugitive.vim and git mergetool</h2>
+
+<p>Today, I read a post by <a href="http://twitter.com/closedbracket">Flaviu Simihaian</a>
+explaining how to <a href="http://readncode.com/blog/how-to-do-a-git-merge-with-vim/">resolve git merge conflicts with
+Vim</a>. Eureka! You
+get to stay in your familar editor while keeping all of the niceties of a 3-way
+diff!</p>
+
+<h2>A little nicer via git mergetool</h2>
+
+<p>I have one more step to add to make the normal workflow a little easier. Git
+actually gives you the ability to define arbitary merge tool command for use
+when resolving merge conflicts, so let&#8217;s use that plus the power of vim to
+change your merge work flow to a simple</p>
+
+<pre><code>$ git merge
+$ git mergetool
+</code></pre>
+
+<h3>Configuring mergetool</h3>
+
+<p>We&#8217;re goingto use the magic of
+<a href="http://vimdoc.sourceforge.net/htmldoc/starting.html">VIM startup commands</a> combined with
+<a href="http://www.kernel.org/pub/software/scm/git/docs/v1.6.4.5/git-mergetool.html">git-mergetool</a>
+to automate loading the appropriate diffs inside vim with fugitive.vim&#8217;s 3-way
+merging awesomeness.</p>
+
+<h4>Install fugitive.vim</h4>
+
+<p>The <a href="https://github.com/tpope/vim-fugitive">fugitive.vim plugin</a> gives you
+access to git commands and information from inside vim. It has the handy
+ability to do a 3-way git-style diff.</p>
+
+<p>Assuming you have <a href="https://github.com/tpope/vim-pathogen">pathogen.vim</a>
+installed (you should), just run:</p>
+
+<pre><code>$ cd ~/.vim/bundle
+$ git clone git://github.com/tpope/vim-fugitive.git
+</code></pre>
+
+<h4>Configure gvim as your mergetool.</h4>
+
+<pre><code>$ git config merge.tool gvim
+$ git config mergetool.gvim.cmd 'gvim "+Gdiff" $MERGED'
+</code></pre>
+
+<h2>Usage</h2>
+
+<p><a href="http://readncode.com/blog/how-to-do-a-git-merge-with-vim/">Flaviu&#8217;s post</a> has
+great instructions on usage, but the gist is to use <code>]c</code> to navigate to
+conflicts and then <code>:diffget //2</code> or <code>:diffget //3</code> to choose the version to
+keep. <code>:diffupdate</code> fixes your whitespace issues and then <code>:only</code> lets you see
+what you&#8217;ve changed before you save.</p>
+</div>
+  
+  
+
+
+  </article>
+
+
+  <article>
+    
+  <header>
+    
       <h1 class="entry-title"><a href="where-are-the-magic-deployment-tools">Where Are the Magic Deployment Tools?</a></h1>
     
     
@@ -714,89 +811,6 @@ from php to django</a>.</p>
 
   </article>
 
-
-  <article>
-    
-  <header>
-    
-      <h1 class="entry-title"><a href="network-latency-between-ec2-instances-public">Network Latency Between Ec2 Instances: Public vs Private IP and Same vs Different Availability Zone</a></h1>
-    
-    
-      <p class="meta">
-
-
-
-
-<time datetime="2010-11-09 15:07:00 -0500" pubdate  updated >Nov 9<span>th</span>, 2010</time>
-
-
-</p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>How Realistic is Your ec2 =&gt; ec2 Load Test?</h2>
-<p>Today I was reading about a cool distributed load-testing tool called <a href="http://blog.apps.chicagotribune.com/2010/07/08/bees-with-machine-guns/">Bees With Machine Guns</a>&nbsp;(awesome name) and a commenter asked how testing ec2 to ec2 might affect the load test. After all, real clients aren&#8217;t going to have local network connection speeds to your application, which is going to change the characteristics of how your application responds. With slow clients you get increased resource usage depending on your setup and you&#8217;d probably like to know whether or not putting that reverse proxy in front of your application server actually helps.</p>
-<p>I was going to suggest in the comments that using a different availability zone would actually solve the problem, but then I realized I was just guessing. So I ran some simple, unscientific tests.</p>
-<h2>Results Summary</h2>
-<p><img src="http://chart.apis.google.com/chart?cht=bhs&amp;chs=450x130&amp;chd=t:.5,2,81.7&amp;chtt=EC2%20Network%20Latency%20(ms)&amp;chco=4D89F9&amp;chxt=x,y&amp;chxl=1:|Different%20Region|Different%20AZ|Same%20AZ" alt="EC2 Network Latency Graph" /></p>
-<p>In a nutshell, if you want mostly-realistic ec2=&gt;ec2 load tests, put your load testing instances in another region. As you would suspect, using the internal vs external DNS entry doesn&#8217;t matter (except for your bill) and moving to another availability zone still gives you super quick connection speed. While moving your tests to another region won&#8217;t give you the variance you need for realistic tests (there are tools for this, though), it is a dead-simple way to get a more-realistic picture of what your application does under load.&nbsp;</p>
-<p>The average response times I received:</p>
-<ul>
-    <li>00.5 ms- Same Region, Same Availability Zone</li>
-    <li>02.0 ms- Same Region, Different Availability Zone</li>
-    <li>81.7 ms- Different Region</li>
-</ul>
-<h2>Test Methodology</h2>
-<p>I spun up 4 instances with 32-bit ubuntu 10.04-based images and ran pings between them using both the public and the private DNS entry. I ran a couple of pings to start to take care of caching the DNS lookup and then I ran:</p>
-<pre>$ ping address.to.ping -c 20</pre>
-<p>Instances:</p>
-<ul>
-    <li>instance.a: high-cpu medium in us-east-<strong>1b</strong></li>
-    <li>instance.b: high-cpu medium in us-east-<strong>1b</strong></li>
-    <li>instance.c: high-cpu medium in us-east-<strong>1d</strong></li>
-    <li>instance.d: high-cpu medium in us-west-<strong>1a</strong></li>
-</ul>
-<h3>Detailed Results</h3>
-<h4>Same Region, Same Availability Zone</h4>
-<p>instance.a =&gt; instance.b</p>
-<p><em>Public DNS</em></p>
-<pre>--- ping statistics ---
-20 packets transmitted, 20 received, 0% packet loss, time 19087ms
-rtt min/avg/max/mdev = 0.397/0.540/0.629/0.061 ms
-</pre>
-<p><em>Private DNS</em></p>
-<pre>--- ping statistics ---
-20 packets transmitted, 20 received, 0% packet loss, time 19096ms
-rtt min/avg/max/mdev = 0.362/0.544/0.733/0.084 ms</pre>
-<h4>Same Region, Different Availability Zone</h4>
-<p>instance.a =&gt; instance.c</p>
-<p><em>Public DNS</em></p>
-<pre>--- ping statistics ---
-20 packets transmitted, 20 received, 0% packet loss, time 19187ms
-rtt min/avg/max/mdev = 1.817/2.035/3.113/0.260 ms
-</pre>
-<p><em>Private DNS</em></p>
-<pre>--- ping statistics ---
-20 packets transmitted, 20 received, 0% packet loss, time 19185ms
-rtt min/avg/max/mdev = 1.790/1.936/2.051/0.078 ms
-</pre>
-<h4>Different Regions</h4>
-<p>instance.a =&gt; instance.d</p>
-<p><em>Public DNS</em></p>
-<pre>--- ping statistics ---
-20 packets transmitted, 20 received, 0% packet loss, time 19176ms
-rtt min/avg/max/mdev = 81.517/81.672/82.059/0.281 ms
-</pre>
-<p><em>Private DNS</em></p>
-<p>Not Available</p>
-</div>
-  
-  
-
-
-  </article>
-
 <nav role="pagination">
   <div>
     
@@ -825,6 +839,10 @@ rtt min/avg/max/mdev = 81.517/81.672/82.059/0.281 ms
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/using-vim-as-your-git-mergetool/">Using Vim as Your Git Mergetool</a>
+      </li>
+    
+      <li class="post">
         <a href="where-are-the-magic-deployment-tools">Where are the magic deployment tools?</a>
       </li>
     
@@ -838,10 +856,6 @@ rtt min/avg/max/mdev = 81.517/81.672/82.059/0.281 ms
     
       <li class="post">
         <a href="todays-amazon-ec2-ebs-outage-in-a-graph">Today&#8217;s Amazon ec2 EBS Outage in a Graph</a>
-      </li>
-    
-      <li class="post">
-        <a href="php-to-django-how-we-did-it">PHP to Django: How we did it</a>
       </li>
     
   </ul>
