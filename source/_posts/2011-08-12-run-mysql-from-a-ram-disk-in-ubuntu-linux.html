@@ -1,0 +1,62 @@
+---
+layout: post
+title: "Run MySQL From a RAM Disk in Ubuntu Linux"
+date: 2011-08-12 15:07
+permalink: run-mysql-from-a-ram-disk-in-ubuntu
+comments: true
+author: Wes Winham
+categories:
+- ubuntu
+- mysql
+- testing
+- nosedjango
+- python
+- django
+---
+
+<p>Here at PolicyStat, we heavily rely on unit tests, selenium tests and continuous integration to keep our quality up so that we can practice continuous delivery. That means we write a lot of tests and we run a lot of tests. A major source of frustration is the painfully <strong>bad MySQL performance</strong> during tests&nbsp;because of table creation overhead. One option we considered was to use the Memory storage engine in MySQL, but you lose some capabilities (blob and text columns) and you're no-longer testing your actual database.</p>
+<p>Yesterday, I finally bit the bullet and figured out how to <strong>configure MySQL to run on a ramdisk</strong>.</p>
+<h2>Results</h2>
+<p>RAMdisks are fast, but we really only saw big performance improvements when compared to an ext4 filesystem on a conventional hdd. Compared to solid state disks with XFS or ext3, the RAMdisk only gave <strong>marginal performance improvements</strong>.&nbsp;</p>
+<p><img src="http://chart.apis.google.com/chart?chxl=1:|ext3|RAMdisk&amp;chxr=0,2000,4200&amp;chxt=x,y&amp;chbh=a&amp;chs=420x240&amp;cht=bhs&amp;chco=4D89F9&amp;chds=0,4117&amp;chd=t:3650,4117&amp;chtt=Test+Suite+Run+Time+(s)" alt="" /></p>
+<p>I ran our full <a href="https://github.com/winhamwr/nosedjango">nosedjango</a>-based test suite of 1340 tests on our ec2-based Hudson slaves. One of the slaves had the RAMdisk fix and the other was just using standard ec2 ephemeral storage with an ext3 filesystem.</p>
+<ul>
+<li>ext3- <strong>4117</strong> seconds</li>
+<li>RAMdisk- <strong>3650</strong> seconds</li>
+</ul>
+<p>The RAMdisk gave us an <strong>11%</strong> performance improvement. Our test suite relies very heavily on fixtures, so this tells me that our test suite is basically <strong>CPU-bound</strong>. Results on ext4 would be more dramatic and so would results on I/O-bound test suites.</p>
+<h2>Caveats</h2>
+<p>These instructions worked on two different Ubuntu 10.04 machines, but I haven't tried it on other distros/versions. If someone can try this on another version and let me know the results, I would love to update the instructions. Also, you should understand what a <a href="http://en.wikipedia.org/wiki/RAM_disk">RAMdisk</a> actually is before proceeding. The main points are that your data will be lost on restart and if you don't actually have free RAM, you won't get much of a benefit.</p>
+<h2>Instructions</h2>
+<p>After a lot of unfruitful googling, I found <a href="http://stackoverflow.com/questions/3096148/how-to-run-djangos-test-database-only-in-memory/4437821#4437821">this stackoverflow answer</a>&nbsp;with some simple instructions. They got me most of the way there, but didn't quite work on my system.</p>
+<p>The following instructions got a working MySQL instance running on a RAMdisk.</p>
+<h3>1 Stop MySQL</h3>
+<p>We're going to be copying the raw mysql data files, and we need them in a consistent state.</p>
+<pre>$ sudo service mysql stop</pre>
+<h3>2 Copy your MySQL data directory to the RAMdisk</h3>
+<p>By default, all of MySQL's data is stored in /var/lib/mysql and that's the folder that needs to be fast. Ubuntu has a RAMdisk located at <em>/dev/shm</em> by default, so we're going to use that. We also want to preserve the permissions on the files so that MySQL can access them.</p>
+<pre>$ sudo cp -pRL /var/lib/mysql /dev/shm/mysql</pre>
+<h3>3 Update your mysqld configuration</h3>
+<p>Now we need to tell mysqld to actually use our new data directory. This setting is "datadir" located in <em>/etc/mysql/my.conf</em> under the [mysqld] section. Change yours to:</p>
+<pre># datadir = /var/lib/mysql
+# Using a RAMdisk
+datadir = /dev/shm/mysql
+</pre>
+<h3>4 Update your apparmor profile</h3>
+<p><a href="http://en.wikipedia.org/wiki/AppArmor">AppArmor</a>&nbsp;is great for keeping programs isolated for security purposes, but it also means that seemingly-small changes can cause AppArmor to break your program. By default, the mysql-server install comes with an AppArmor profile that locks mysqld to a specific set of files. <em>/dev/shm/mysql</em> isn't in the default profile (obviously), so we need to add it.</p>
+<p>First, open <em>/etc/apparmor.d/usr.sbin.mysqld</em> with your favorite text editor:</p>
+<pre>$ sudo vim /etc/apparmor.d/usr.sbin.mysqld</pre>
+<p>Then add the following lines inside the "/usr/sbin/mysqld" section (between the braces):</p>
+<pre>/dev/shm/mysql/ r,
+/dev/shm/mysql/** rwk,
+</pre>
+<h3>5 Restart apparmor and MySQL</h3>
+<p>And if everything has gone well, we just need to restart our services and get on to our much-faster testing.</p>
+<pre>$ sudo service apparmor restart
+$ sudo service mysql start</pre>
+<h2>Results</h2>
+<p>If you're using ext4 for your hard drive, you should see a *huge* performance improvement with a ramdisk. <a href="/authors/christian">Christian's</a> single selenium testcase run went from several painful minutes to 17 seconds. ext4 is a bit more paranoid about ensuring that changes are actually flushed to disc versus ext3, so you see a very large performance hit doing database and table creation. That means the gains from a RAMdisk are more dramatic.</p>
+<p>TODO: I have plans to create an upstart script to manage the process of copying data to the RAMdisk on every boot, but for now you'll need to do that manually every reboot.</p>
+<h2>Troubleshooting</h2>
+<h3>Not enough RAM (ibdata1 file is too big)</h3>
+<p>By default when using innodb, the /var/lib/mysql/ibdata1 file grows and grows, even after you delete all of your database. In our case, Christian's ibdata1 file was &gt;300MB for no particular reason. This stackoverflow question explains <a href="http://stackoverflow.com/questions/3456159/how-to-shrink-purge-ibdata1-file-in-mysql">how to shrink your ibdata1 file</a>.&nbsp;</p>

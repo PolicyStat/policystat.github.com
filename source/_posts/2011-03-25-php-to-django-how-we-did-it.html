@@ -1,0 +1,48 @@
+---
+layout: post
+title: "PHP to Django: How we did it"
+date: 2011-03-25 15:07
+permalink: php-to-django-how-we-did-it
+comments: true
+author: Wes Winham
+categories:
+- django
+- python
+- php
+---
+
+<h2>Only Took me Four Months</h2>
+<p>Back in November I wrote about our slow journey from <a href="/php-to-django-changing-the-engine-while-the-c">PHP to Django</a>. Our startup went from a 100% PHP application to 100% Django over 22 months, with the two sides coexisting in production. We slowly made the conversion while also improving our product with new features, bug fixes and polish all around. From the response to that post, it seems like this might be a problem that other people have had or are having and at least a few people wanted more details.</p>
+<p>So here I am putting code where my mouth is.</p>
+<p><img src="/images/posts/php-to-django-how-we-did-it/first_commit.png" alt="first django-php-bridge commit" /></p>
+<p>This post is an introduction to the <a href="https://github.com/winhamwr/django-php-bridge">django-php-bridge</a> project and a more technical discussion of how we made the transition.</p>
+<h2>Introducing Django-PHP-Bridge</h2>
+<p>The goal of django-php-bridge is to make it easier for PHP projects and Django projects to live side by side, passing authenticated users back and forth seemlessly.</p>
+<p>I see four different cases where it makes sense to have Django and PHP projects living side by side:</p>
+<ol>
+    <li>You want to convert your PHP app to Django, but you realize how *ahem* stupid it would be to live in a coding bubble for a few months to rewrite things. Your customers want you to innovate and your competitors won't wait for you.</li>
+    <li>You want to convert your Django app to PHP. I'm not sure why you would do this, but I know that someone somewhere has this need.</li>
+    <li>You have legacy Django and/or PHP applications that you want to mash together for a better user experience.</li>
+    <li>You have a real reason to build an application using two different technologies.&nbsp;</li>
+</ol>
+<p>We want to help make it easier to do all of those things by providing glue code, documentation and utilities. When we made the transition at PolicyStat, it was pretty rough finding any information and I feel like we wrote a lot of code that other people had already written, code that has since been re-written many times</p>
+<h2>Django &lt; == &gt; PHP Under the Hood</h2>
+<p>The integration has just a few major components:</p>
+<ul>
+    <li>Session serialization</li>
+    <li>Session storage</li>
+    <li>User schema</li>
+</ul>
+<h3>Session Serialization</h3>
+<p>The absolute core piece to the whole integration is <a href="https://github.com/winhamwr/django-php-bridge/blob/master/django_php_bridge/backends/db.py">django_php_bridge.backends.db</a>, the Django session backend that speaks PHP's serialization format.&nbsp;<a href="http://twitter.com/mitsuhiko">Armin Ronacher's</a>&nbsp;wonderful <a href="http://pypi.python.org/pypi/phpserialize">PHPSerialize</a>&nbsp;library does the bulk of the heavy lifting here. Basically, we're using the normal Django database-backed session backend, only we're serializing all of the session data to the format that PHP expects.&nbsp;</p>
+<h3>Session Storage</h3>
+<p>On the other side of that integration, we need to make sure that the PHP side knows how to grab and create session data in the DB table. Luckily, PHP has what are basically pluggable session backends. I submitted a stripped down version of the backend that we use in contrib:&nbsp;<a href="https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/djangoSession.class.php">https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/djangoSession.class.php</a></p>
+<h3>User Schema</h3>
+<p>Now that we have both sides speaking the same language with regards to sessions, we need to make them both understand users. The key here is that you have to agree on the schema for your user data. In this case, I think it makes the most sense to follow Django's built-in User model along with their Profile system because not doing so shuts you out of a lot of re-usable Django applications.&nbsp;</p>
+<p>Once you've decided to use the Django schema for users, you have a conversion script to write to take your existing schema and map it to Django's. One wrinkle here is that you will probably need to move around password hashes, which could be a major pain. Luckily, Django's <a href="http://docs.djangoproject.com/en/1.3/topics/auth/#passwords">password documentation</a>&nbsp;explains the way the hash is stored and it's stored in a very flexible manner. So if you weren't using a salt or maybe were using a different hash algorithm, Django has your back and our example PHP user object has functions for hashing and unhashing django-style passwords.</p>
+<p>Once you have your User and Profile objects converted over, you'll need to change your PHP application to respect that new schema. Depending on what PHP framework you're using and on how your PHP code is structured, this could be as simple as changing one class, or it could be very difficult. Regardless, I've included a very simple, not awesome example of what this might look like in PHP culled from our actual codebase:&nbsp;<a href="https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/user.class.php">https://github.com/winhamwr/django-php-bridge/blob/master/contrib/php/user.class.php</a></p>
+<h2>Future Direction</h2>
+<p>I would absolutely love to see some contributions with examples of how to use the serialization backend with specific PHP frameworks like CakePHP and Symfony. One of the strengths of PHPs is the ability to rig things together in an ad-hoc way to build what you need. Unfortunately, that comes back to bite us when we're trying to give instructions on how to do basically anything with a "PHP application" because that doesn't really have much meaning from a code/structure/architecture perspective. The PHP frameworks generally solve that lack of structure and will hopefully allow us to build some PHP code that's actually re-usable in the general case.</p>
+<p>We're no longer using any PHP at PolicyStat, and I don't have much passion to write much more PHP in my spare time, but I'd very much like to help where I can with python code, documentation and the curation of PHP submissions. If you've already built this kind of Django to PHP integration using one of the PHP frameworks like CakePHP, I'd especially love to add your code to the project.</p>
+<h2>Pull Requests Wanted</h2>
+<p>I'd welcome any feedback as far as what other people solving this problem would like to see. What would be helpful? I'd also really like to accept contributions with documentaiton, utilities, examples and anything else that would make it easier for someone to build a Django project that lives side by side with a PHP project. Any ideas at all, feel free to ping me on twitter <a href="http://twitter.com/weswinham">@weswinham</a> and please fork <a href="https://github.com/winhamwr/django-php-bridge">django-php-bridge on github</a>.</p>

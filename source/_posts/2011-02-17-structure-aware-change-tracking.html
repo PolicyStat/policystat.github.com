@@ -1,0 +1,84 @@
+---
+layout: post
+title: "Structure Aware Change Tracking"
+date: 2011-02-17 15:07
+permalink: structure-aware-change-tracking
+comments: true
+author: Christian Oudard
+categories:
+- HTML
+- python
+---
+
+<p>At PolicyStat, whenever we have written a chunk of code that seems like it might have widespread usefulness, we like to release it as open source. We have recently released HTML Tree Diff, a library for showing diffs between HTML documents in a structure-aware way. It is written in Python, and you can get the source code at <a href="https://github.com/christian-oudard/htmltreediff" target="_blank">GitHub</a>, or install it from the <a href="http://pypi.python.org/pypi/html-tree-diff/0.1.0" target="_blank">Python Package Index</a>.</p>
+<p>We work with HTML documents every day, and we were disappointed that there was not an existing library to display "track-changes" style diffs between HTML documents. This code has been used in production since June 2009, and we're excited to share it with the community.</p>
+<h2>Documents</h2>
+<p>Let's say you have a document. &nbsp;<em>Very Important Document</em><sup>tm</sup>. And some <em>Very Important People</em> are interested in what's in the document. Now, as very important as these people are, they don't have the time to read through the entire thing each time it gets updated, but they would like to know what exactly the changes are. That's where diff comes in.</p>
+<p>Let me show you an example:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Old</td>
+            <td>New</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/old_document.png" alt="old document" /></td>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/new_document.png" alt="new document" /></td>
+        </tr>
+    </tbody>
+</table>
+<p>Someone has changed the jelly donut schedule! It's been the same for years! How will we remember the new one? Everybody panic!</p>
+<p><img src="/images/posts/structure-aware-change-tracking/panic.gif" alt="PANIC" /></p>
+<h2>Diffs</h2>
+<p>But wait, through the clever use of technology, you can calm the panic by showing them exactly what changed between the two documents:</p>
+<p><img src="/images/posts/structure-aware-change-tracking/inline_diff.png" alt="inline diff" /></p>
+<p>As you may know, this is a <a href="http://en.wikipedia.org/wiki/Diff" target="_blank">diff</a>. It concisely shows what lines have changed between the successive versions. We can even fancy it up and use html styling to make it more readable:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Source</td>
+            <td>Rendered</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/source_doc.png" alt="source doc" /></td>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/rendered_doc.png" alt="rendered doc" /></td>
+        </tr>
+    </tbody>
+</table>
+<h2>HTML Documents</h2>
+<p>This works pretty well for files that are just flat text, but what if our <em>Very Important Document</em> is in HTML format? It turns out that PolicyStat has exactly this situation. We have tens of thousands of <em>Very Important Documents</em> that are stored in HTML format, and have multiple versions.</p>
+<p>So let's look at what happens when we try the same thing on an HTML document:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Source</td>
+            <td>Rendered</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/source_html.png" alt="source html" /></td>
+            <td style="vertical-align: top;"><img src="/images/posts/structure-aware-change-tracking/rendered_html.png" alt="rendered html" /></td>
+        </tr>
+    </tbody>
+</table>
+<p>Disaster! That's not even valid HTML! The <em>Very Important People</em> are now <em>Very Angry</em>!</p>
+<h2>HTML Diffs</h2>
+<p>What do we do about this? It turns out that this is not a trivial problem to solve. You have to consider that HTML is not flat like a text file, but actually a tree structure.</p>
+<p>So, to create a diff between two HTML documents, the diff algorithm needs to be aware of the tree structure. There has been some <a href="http://www.google.com/search?sourceid=chrome&amp;ie=UTF-8&amp;q=tree+edit+distance" target="_blank">research</a>&nbsp;in this area, but none of it that we found was implemented in a practical way, with real-world usefulness.</p>
+<p>To solve this, I wrote a library that does structure aware diffs of HTML trees. Here's some example output:</p>
+<table>
+    <tbody>
+        <tr>
+            <td>Source</td>
+            <td>Rendered</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">
+                <img src="/images/posts/structure-aware-change-tracking/structure_aware_diff_html.png" alt="structure-aware diff HTML" />
+            </td>
+            <td style="vertical-align: top;">
+                <img src="/images/posts/structure-aware-change-tracking/structure_aware_diff_rendered.png" alt="sturcture-aware diff rendered" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p>The day is saved! Everyone shows up on time for jelly donuts, and the donut rebellion of 2011 is quelled!</p>

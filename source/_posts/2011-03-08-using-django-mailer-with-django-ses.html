@@ -1,0 +1,44 @@
+---
+layout: post
+title: "Using django-mailer with django-ses for Amazon SES goodness"
+date: 2011-03-08 15:07
+permalink: using-django-mailer-with-django-ses-for-amazo
+comments: true
+author: Wes Winham
+categories:
+- django
+- python
+- aws
+---
+
+<p>Amazon's new <a href="http://aws.amazon.com/ses/">Simple Email Service</a> is pretty awesome.</p>
+<p>Previously, there were basically two options:</p>
+<ol>
+    <li>Pay out the wazoo per message</li>
+    <li>Hassle with setting up a mail server and continuously wrangle with the email world to avoid spam filters</li>
+</ol>
+<p>
+    <img src="/images/posts/using-django-mailer-with-django-ses/spam.jpg" alt="spam" />
+</p>
+<p>With SES, you avoid the hassle of deliverability and you get 2k messages per day for free with 1 penny per hundred messages over that.</p>
+<p>At PolicyStat, we use <a href="http://pypi.python.org/pypi/django-mailer/0.1.0">django-mailer</a>&nbsp;to queue up emails for sending so that we don't need to make an SMTP connection inside the request/response cycle. It also gives us nice logging and do-not-send abilities and we wanted to keep those. We also really wanted to use SES.</p>
+<p>Luckily, as is usually the case with the Python and Django community, in the ~2 weeks between the SES announcement and the time we wanted to implement, the wonderful community around <a href="https://github.com/boto/boto">Boto</a> had already grown SES support and a gentlemen named <a href="http://hmarr.com/">Harry Marr</a> out of the UK had created a <a href="https://github.com/hmarr/django-ses">Django app for SES Email</a> called django-SES.</p>
+<p>The integration was painless for us thanks to <a href="http://docs.djangoproject.com/en/dev/releases/1.2/#e-mail-backends">Django 1.2's email backend support</a>. The problem we ran in to was that django-mailer was specifically designed for use with SMTP-based email sending. In the <code>send_all()</code> function used for sending all of the emails in your queue, there was code like:</p>
+<pre>except (socket_error, smtplib.SMTPSenderRefused, smtplib.SMTPRecipientsRefused, smtplib.SMTPAuthenticationError), err:
+                mark_as_deferred(message, err)
+                deferred += 1
+</pre>
+<p>This worked great for SMTP sending. If a message failed for any of the expected reasons, that message was deferred for later (in case of a temporary problem) and the function kept chugging through the rest of the queue. With django-ses and boto though, you don't get SMTP errors. You get things that look like:</p>
+<pre>400 Bad Request
+&lt;ErrorResponse xmlns="http://ses.amazonaws.com/doc/2010-12-01/"&gt;
+  &lt;Error&gt;
+    &lt;Type&gt;Sender&lt;/Type&gt;
+    &lt;Code&gt;MessageRejected&lt;/Code&gt;
+    &lt;Message&gt;Address blacklisted.&lt;/Message&gt;
+  &lt;/Error&gt;
+  &lt;RequestId&gt;eb0e8eda-48c2-11e0-8b2e-91b9805ad73d&lt;/RequestId&gt;
+&lt;/ErrorResponse&gt;
+</pre>
+<p>When this happens, the <code>send_all</code> function fails out, your message isn't deferred and all emails after this one are effectively blocked. That's bad.</p>
+<p>Our fix, after experimenting with the bad idea of <a href="https://github.com/winhamwr/django-ses/commit/7f1ec14ade17dccbc9c2af52565f10a6859fd15b">wrapping Boto exceptions in SMTP exceptions</a>, was to simply use a bare <code>except:</code> statement for <code>send_all()</code>. Now SES errors don't block our queue and we're back to being happy. We're using our <a href="https://github.com/winhamwr/django-mailer">django-ses compatible django-mailer fork</a> in production right now.</p>
+<p>Next step will be to find a way to automatically handle "Address blacklisted" messages, but that's for another day. I'm just happy to stop our ghetto system of getting a pagerduty notification at 3am and manually rotating our SMTP user in production as we hit our quota. Thank you SES, boto, django-ses and django-mailer for taking back my sleep time.</p>

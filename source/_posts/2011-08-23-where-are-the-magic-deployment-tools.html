@@ -1,0 +1,40 @@
+---
+layout: post
+title: "Where are the magic deployment tools?"
+date: 2011-08-25 15:07
+permalink: where-are-the-magic-deployment-tools
+comments: true
+author: Wes Winham
+categories:
+- python
+- django
+- devops
+- deployment
+---
+
+<p>This is a cross-post + Edit of my comment on a blog post by <a href="http://twitter.com/lusis">@lusis</a> on <a href="http://blog.lusis.org/blog/2011/08/22/the-configuration-management-divide/">The Configuration Management Divide</a>.</p>
+<h2>Deployment is Not a Solved Problem</h2>
+<p>From a developer's perspective, CM is definitely not a solved problem in general. It's solved for people using a PaaS provider like <a href="http://www.heroku.com/">heroku</a> (until you hit a limit) and it's solved for developers in shops where someone has written a custom tool to make it easy (sounds like <a href="https://github.com/etsy/deployinator">Deployinator</a> at Etsy is an example).&nbsp;</p>
+<p>As a developer, I want two things from CM:</p>
+<h3>I want to test something locally and then programmatically capture that setup in a way I can easy replicate.&nbsp;</h3>
+<p>Chef + Vagrant seems very close to solving this problem, but the reality is that adoption isn't super high yet. It's also surprisingly hard to get &nbsp;developers (in my experience) to care about the advantages of writing/using/modifying Chef cookbooks/roles instead of Fabric or python scripts. In general though, I don't see any gaps in Chef + Vagrant for solving this part of the problem. They're both getting better and I see the day when the average new-hire experience at the average software company involves getting your laptop and running one command for an instant local mirror of the production setup.</p>
+<pre>git clone git://foo bar &amp;&amp; cd bar &amp;&amp; vagrant up</pre>
+<p>Boom. No wiki. No checklist. No crash errors because it's been two months since the last time someone tried to set up a fresh machine.</p>
+<h3>I want to run one command to deploy and I want it to magically work and work very quickly.&nbsp;</h3>
+<p>This is the part that I see as unsolved in a general case (again, outside certain PaaS providers and proprietary scripts within companies). Deploying in production doesn't just mean "make these 8 nodes have this configuration," but that's the problem I see that's well-solved with Chef Server, Puppet, Cloud Foundry (could be wrong here, only have 2 days of experience). The magic deploy that you need to get a python web app updated using AWS &nbsp;involves: &nbsp;</p>
+<ol>
+    <li>Doing verification on the code to make sure I'm on a tagged, pushed version of the code in git and that I've passed the required tests</li>
+    <li>Writing to a chat room to let people know a deploy is happening + random other one-off things unrelated to the actual deploy process</li>
+    <li>Checking that all of the nodes I need actually exist, are bootstrapped and have basic monitoring (there are good tools for doing this part now)</li>
+    <li>Gathering all of the data about nodes in your system to pass around like URLs to memcached servers (tools like Noah are good here I think)</li>
+    <li>Pulling a test node out of the load balancer</li>
+    <li>Configuring that node (chef solo is awesome for this now), running migrations, keeping things versioned for rollback, and all of the single-node deployment things that are well-addressed by tools</li>
+    <li>Testing the health of that node, putting it back in the load balancer and making sure things don't blow up</li>
+    <li>Gradually repeating the out-of-loadbalancer, configure, test, back-in-load-balancer steps for the rest of the nodes</li>
+</ol>
+<p>Then you've got lots of other details like creating dev/staging versions with different configs, pulling in live data for testing, versioning static media, rollback, forward-compatible schema migrations (and testing that), continuous integration, trade-offs in speed/flexibility in how much you put in your AMIs, monitoring, etc. Also, it should be fast or a developer will start avoiding extra deploys by batching them.</p>
+<p>It seems like every production python web app (and I think Ruby, Node.js, PHP etc) needs to do all of these boringish things, but everyone has had to cobble together their own solution. I'm absolutely for unix-style single purpose tools, but if there's something out there that aims to generally solve the deploy part of the configuration management problem, I'm missing it.</p>
+<h2>Everyone Deploys</h2>
+<p>Every company with a production web app has had to deal with these problems. In a startup, that usually means you start with all of the problems and only solve one at a time and only as you need to. Why are we all re-inventing this wheel and where are the open source projects trying to solve this problem?</p>
+<p>Everyone should be able to:</p>
+<pre>foo deploy:live active up</pre>
